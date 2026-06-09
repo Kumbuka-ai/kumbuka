@@ -2,7 +2,8 @@
 
 The Community Edition is the free, self-hosted, single-tenant memory core. It
 runs as a single Docker Compose stack: the Quarkus backend, PostgreSQL, Keycloak
-(the identity provider), and a Caddy edge.
+(the identity provider), a Caddy edge, and the Next.js admin console served at
+the root path.
 
 The deployable stack lives in the
 [`kumbuka-server`](https://github.com/kumbuka-ai/kumbuka-server) repository. This
@@ -25,8 +26,12 @@ own.
 
 ## 1. Get the stack
 
+Clone the server and the console **side by side** — the console is wired into the
+server's compose stack by a relative path (step 4):
+
 ```bash
 git clone https://github.com/kumbuka-ai/kumbuka-server
+git clone https://github.com/kumbuka-ai/kumbuka-console
 cd kumbuka-server
 ```
 
@@ -42,10 +47,12 @@ hostnames and strong secrets. The full list of knobs is documented in
 [configuration.md](configuration.md) and in the
 [`kumbuka-server` README](https://github.com/kumbuka-ai/kumbuka-server#quick-start-dev).
 
-## 3. Start it
+## 3. Start the backend stack
+
+The backend services are gated behind the `app` Compose profile:
 
 ```bash
-docker compose up -d
+docker compose --profile app up -d
 ```
 
 This brings up the backend, PostgreSQL, Keycloak (with the `kumbuka` realm
@@ -56,7 +63,43 @@ docker compose ps
 docker compose logs -f kumbuka-backend
 ```
 
-## 4. First run
+At this point the admin API and the `/mcp` endpoint are live, but the **root
+path (`/`) returns a 502** — that is the expected "backend-only" state until you
+add the console in the next step.
+
+## 4. Add the admin console
+
+The console (a Next.js BFF) lives in its own repository and is wired into the
+same stack with a `compose.override.yml` in the `kumbuka-server` directory.
+Compose merges this file automatically:
+
+```yaml
+# kumbuka-server/compose.override.yml
+services:
+  kumbuka-console:
+    build: ../kumbuka-console        # or: image: ghcr.io/kumbuka-ai/kumbuka-console:latest
+    environment:
+      NEXT_PUBLIC_APP_NAME: kumbuka.ai
+      KUMBUKA_BACKEND_URL: http://kumbuka-backend:8080
+    networks: [internal]
+    depends_on: [kumbuka-backend]
+    profiles: ["app"]
+```
+
+Caddy already proxies the root path to this service, so no routing changes are
+needed. Bring the console up with the same command — Compose picks up the
+override:
+
+```bash
+docker compose --profile app up -d
+```
+
+The root path now serves the console. It binds only to the internal Docker
+network; Caddy remains the sole public entry point. (For local development
+against a live or mock backend without Docker, see the
+[`kumbuka-console` README](https://github.com/kumbuka-ai/kumbuka-console#running).)
+
+## 5. First run
 
 1. **Sign in to the admin console** at your configured console host (e.g.
    `https://kumbuka.ai`). The first administrator is provisioned during stack
@@ -70,7 +113,7 @@ docker compose logs -f kumbuka-backend
 5. **Open the connector card** in **Settings** to get the endpoint URL, client
    id, and client secret you will hand to an AI client.
 
-## 5. Connect an assistant
+## 6. Connect an assistant
 
 With the stack up and the connector details in hand, add kumbuka to your AI
 client — see [connecting-an-assistant.md](connecting-an-assistant.md).
