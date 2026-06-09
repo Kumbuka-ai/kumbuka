@@ -44,16 +44,23 @@ memory.
   **private memory is left untouched and remains theirs**. Re-enabling restores
   access to it. Disable is reversible and destroys nothing.
 
-- **Erasure** *(intended counterpart — see flag below)* — the deliberate opposite
-  of disable: removing the member and their private scope entirely, so the
-  private content is gone, not merely suspended. This is the expected behavior
-  for an account-deletion / right-to-erasure request.
+- **Erasure** *(ratified behavior)* — the deliberate opposite of disable: the
+  member's account **and their entire private scope** are removed, so the private
+  content is **gone, not merely suspended**. This is the behavior for an
+  account-deletion / right-to-erasure request.
 
-> **TBD — needs ratification.** Only **disable** semantics are ratified in the
-> canonical specs. The exact erasure behavior (scope of deletion, handling of the
-> member's authored *shared* entries, retention/grace windows) is **not yet
-> decided** and must be confirmed before it is documented as binding. `[founder
-> input]`
+How erasure treats what the member touched:
+
+- **Private memory** — deleted in full. Nothing of the member's private scope
+  survives erasure.
+- **Shared entries they authored** (in `global` / `project` scopes) — **retained**,
+  so team knowledge the group relies on is not lost when a person leaves. Their
+  **authorship is anonymized** to a tombstone identity (e.g. *former member*).
+  This is a server-side deletion event, consistent with the
+  [server-derived-authorship invariant](#release-blocking-invariants) — authorship
+  is reassigned by the server, never by a client flag.
+- **Grace window** — erasure is **reversible for a short, configurable retention
+  period (default 30 days)**; after it elapses, deletion is permanent.
 
 ## Release-blocking invariants
 

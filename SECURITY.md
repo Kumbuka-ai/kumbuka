@@ -8,8 +8,7 @@ helping keep it sound.
 
 **Please do not report security vulnerabilities through public GitHub issues.**
 
-Instead, email **security@kumbuka.ai** *(placeholder — to be confirmed; see the
-note below)* with:
+Instead, email **security@kumbuka.ai** with:
 
 - a description of the issue and its impact,
 - the steps to reproduce it,
@@ -19,10 +18,6 @@ note below)* with:
 We ask for **coordinated disclosure**: give us a reasonable window to investigate
 and ship a fix before any public disclosure. We will acknowledge your report,
 keep you updated, and credit you if you would like.
-
-> **Maintainer note — `[founder input]`:** `security@kumbuka.ai` is a
-> **placeholder**. Confirm the real disclosure mailbox (and, if desired, a PGP
-> key or a security.txt entry) before this repository is published.
 
 ## Supported versions
 

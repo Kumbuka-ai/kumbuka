@@ -1,0 +1,14 @@
+# Patterns lychee should skip (one regex per line).
+
+# Badge host — shields.io rate-limits aggressively and is not "documentation".
+https://img.shields.io
+
+# Pre-beta marketing + example deployment hostnames. These are illustrative
+# config values (hostnames are not hardcoded) and may not resolve or serve yet.
+https://kumbuka.ai
+https://memory.kumbuka.ai
+https://auth.kumbuka.ai
+
+# Internal Docker-network hostname from the compose examples — never resolvable
+# from outside the stack.
+http://kumbuka-backend:8080
