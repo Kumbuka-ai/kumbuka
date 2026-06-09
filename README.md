@@ -7,6 +7,7 @@
 **Shared, persistent memory for AI assistants working with a team —
 served over MCP, curated through an admin console, with a private space that stays private.**
 
+[![CI](https://img.shields.io/github/actions/workflow/status/kumbuka-ai/kumbuka/ci.yml?style=flat-square&label=CI&color=FF5B1F)](https://github.com/kumbuka-ai/kumbuka/actions/workflows/ci.yml)
 ![License](https://img.shields.io/badge/license-AGPL_v3-FF5B1F?style=flat-square)
 ![MCP](https://img.shields.io/badge/MCP-Streamable_HTTP-FF5B1F?style=flat-square)
 ![Private memory](https://img.shields.io/badge/private_memory-structurally_guaranteed-141820?style=flat-square&labelColor=FF5B1F)
