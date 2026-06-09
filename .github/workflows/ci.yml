@@ -62,7 +62,7 @@ jobs:
       - name: markdownlint-cli2
         uses: DavidAnson/markdownlint-cli2-action@v20
         with:
-          config: '.github/markdownlint.json'
+          config: '.markdownlint.json'
           globs: '**/*.md'
 
   # ---- Mermaid validation is OFF by default (only 2 diagrams; GitHub renders them natively).
