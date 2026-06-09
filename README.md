@@ -84,13 +84,15 @@ The deployable stack lives in the
 ```bash
 git clone https://github.com/kumbuka-ai/kumbuka-server
 cd kumbuka-server
-cp .env.example .env          # set your domain + secrets
-docker compose up -d          # backend + postgres + keycloak + caddy
+cp .env.example .env                  # set your domain + secrets
+docker compose --profile app up -d    # backend + postgres + keycloak + caddy
 ```
 
-Full step-by-step instructions — prerequisites, first run, and production
-deployment — are in **[docs/quickstart.md](docs/quickstart.md)** and the
-[`kumbuka-server` runbook](https://github.com/kumbuka-ai/kumbuka-server#quick-start-dev).
+The admin console is a separate service, added to the same stack via a small
+`compose.override.yml` — see the step-by-step
+**[docs/quickstart.md](docs/quickstart.md)**, which also covers prerequisites,
+first run, and the [`kumbuka-server` runbook](https://github.com/kumbuka-ai/kumbuka-server#quick-start-dev)
+for production deployment.
 
 ## Connect your assistant
 
