@@ -59,7 +59,7 @@ request. Acceptance is recorded by our CLA management tool, which gates merges.
 > will coordinate sign-off before merge; opening a PR is still welcome. The ICLA
 > covers **individual** contributors; contributions made on behalf of an
 > **organization** are handled by a separate **corporate CLA (CCLA)**, which is
-> referenced by the ICLA but **not yet published**. Questions: legal@kumbuka.ai.
+> referenced by the ICLA but **not yet published**. Questions: <legal@kumbuka.ai>.
 
 ## Documentation conventions
 

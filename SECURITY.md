@@ -8,7 +8,7 @@ helping keep it sound.
 
 **Please do not report security vulnerabilities through public GitHub issues.**
 
-Instead, email **security@kumbuka.ai** with:
+Instead, email **<security@kumbuka.ai>** with:
 
 - a description of the issue and its impact,
 - the steps to reproduce it,
