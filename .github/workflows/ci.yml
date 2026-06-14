@@ -16,6 +16,29 @@ permissions:
   contents: read
 
 jobs:
+  # Required check (branch protection). Internal links are now hard-gated by the
+  # `Build docs site` job (starlight-links-validator). This job stays as the
+  # external-link rot reporter — report-only so transient 5xx/rate-limits don't
+  # turn the build red; results land in the job summary.
+  links:
+    name: Check Markdown links
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check external links (report only)
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: >-
+            --no-progress
+            --include-fragments
+            --max-retries 3
+            --retry-wait-time 5
+            --accept 200,206,429
+            --exclude '^/'
+            './**/*.md'
+          fail: false
+          jobSummary: true
+
   # The build IS the gate: starlight-links-validator fails the build on a broken
   # internal link or missing heading anchor, and Astro fails on bad content.
   build:
