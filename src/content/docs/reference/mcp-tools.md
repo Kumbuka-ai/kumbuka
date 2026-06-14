@@ -1,87 +1,91 @@
 ---
-title: MCP tools
-description: The five MCP tools an AI assistant calls to remember, recall, and forget a team's steering knowledge over a remote server.
+title: MCP-Tools
+description: Die fünf MCP-Tools, die ein KI-Assistent aufruft, um das steuernde Wissen eines Teams zu speichern, abzurufen und zu vergessen — bereitgestellt über einen Remote-Server.
 ---
 
-kumbuka exposes a remote **MCP server over Streamable HTTP** at `/mcp`, scoped to
-the authenticated user. Five tools make up the surface. The names are kept
-functional rather than brand-prefixed — the model reads them, and clarity beats
-brand noise.
+kumbuka stellt einen Remote-**MCP-Server über Streamable HTTP** unter `/mcp`
+bereit, der auf den authentifizierten Benutzer beschränkt ist. Fünf Tools bilden
+die Oberfläche. Die Namen sind bewusst funktional statt markenpräfigiert gehalten —
+das Modell liest sie, und Klarheit schlägt Markengeräusch.
 
-Tool returns are **structured JSON** (MCP `structuredContent`) so the model can
-read fields reliably rather than re-parsing prose.
+Tool-Rückgaben sind **strukturiertes JSON** (MCP `structuredContent`), damit das
+Modell Felder zuverlässig lesen kann, anstatt Prosa erneut zu parsen.
 
-There is also an MCP **resource** `memory://{scope}` that lists a scope's
-contents.
+Es gibt außerdem eine MCP-**Ressource** `memory://{scope}`, die den Inhalt eines
+Scopes auflistet.
 
-For the underlying concepts (scopes, types, keys, authorship) see
-[Concepts](/concepts/data-model/).
+Zu den zugrunde liegenden Konzepten (Scopes, Typen, Schlüssel, Autorschaft) siehe
+[Konzepte](/concepts/data-model/).
 
 ---
 
 ## `memory_remember`
 
-Write a new entry, or upsert an existing one when a `key` is supplied.
+Schreibt einen neuen Eintrag oder führt einen Upsert eines bestehenden Eintrags
+durch, wenn ein `key` angegeben wird.
 
-| Parameter | Required | Description |
+| Parameter | Erforderlich | Beschreibung |
 |---|---|---|
-| `content` | yes | The statement to remember (plain text). |
-| `type` | yes | One of `decision`, `convention`, `constraint`, `open_question`, `glossary`, `status`. |
-| `scope` | no | Target scope slug. If omitted, the team's **default write-scope policy** decides (`ask` / `project` / `global` — see [Configuration](/reference/configuration/)). |
-| `key` | no | Lowercase, dot/kebab-namespaced address (e.g. `db.system-of-record`). When given, a matching entry is updated in place rather than duplicated. |
+| `content` | ja | Die zu merkende Aussage (Klartext). |
+| `type` | ja | Einer von `decision`, `convention`, `constraint`, `open_question`, `glossary`, `status`. |
+| `scope` | nein | Ziel-Scope-Slug. Wird er weggelassen, entscheidet die **Standard-Schreib-Scope-Richtlinie** des Teams (`ask` / `project` / `global` — siehe [Konfiguration](/reference/configuration/)). |
+| `key` | nein | Kleingeschriebene, mit Punkt/Kebab namensräumlich gegliederte Adresse (z. B. `db.system-of-record`). Wenn angegeben, wird ein passender Eintrag an Ort und Stelle aktualisiert statt dupliziert. |
 
-Authorship is recorded automatically from the write channel; a client cannot set
-it.
+Die Autorschaft wird automatisch aus dem Schreibkanal erfasst; ein Client kann sie
+nicht setzen.
 
 ## `memory_recall`
 
-Read entries with filters. All parameters are optional; with none, it returns
-what the caller may see in context.
+Liest Einträge mit Filtern. Alle Parameter sind optional; ohne Angabe liefert es
+zurück, was der Aufrufer im Kontext sehen darf.
 
-| Parameter | Description |
+| Parameter | Beschreibung |
 |---|---|
-| `scope` | Restrict to a scope slug. |
-| `type` | Restrict to one entry type. |
-| `query` | Substring match over content. |
-| `include_global` | Whether to fold in the `global` baseline alongside the selected scope. |
+| `scope` | Auf einen Scope-Slug beschränken. |
+| `type` | Auf einen Eintragstyp beschränken. |
+| `query` | Teilstring-Treffer über den Inhalt. |
+| `include_global` | Ob die `global`-Baseline neben dem ausgewählten Scope eingebunden wird. |
 
-`memory_recall` only ever returns entries the calling user is permitted to see.
+`memory_recall` liefert immer nur Einträge zurück, die der aufrufende Benutzer
+sehen darf.
 
 ## `memory_forget`
 
-Remove an entry.
+Entfernt einen Eintrag.
 
-| Parameter | Description |
+| Parameter | Beschreibung |
 |---|---|
-| `scope` | The scope the entry lives in. |
-| `key` *or* `id` | Identify the entry by its `key` within the scope, or by its `id`. |
+| `scope` | Der Scope, in dem der Eintrag liegt. |
+| `key` *oder* `id` | Identifiziert den Eintrag über seinen `key` innerhalb des Scopes oder über seine `id`. |
 
-Private entries are protected by the owner check — only the owner, over their own
-session, can forget their private entries.
+Private Einträge werden durch die Eigentümerprüfung geschützt — nur der Eigentümer
+kann über seine eigene Sitzung seine privaten Einträge vergessen.
 
 ## `memory_scopes`
 
-List the scopes the caller may see — their own `private` scope plus every shared
-scope (`global` and the `project` scopes they have access to). No parameters.
+Listet die Scopes auf, die der Aufrufer sehen darf — seinen eigenen
+`private`-Scope sowie jeden geteilten Scope (`global` und die `project`-Scopes, auf
+die er Zugriff hat). Keine Parameter.
 
 ## `memory_load_context`
 
-Return a typed, ready-to-inject **digest** of the relevant rules, grouped by type
-(decision / convention / constraint / open_question / glossary / status) and
-capped per group. This is the tool to call at the start of a session so the
-assistant carries the team's steering knowledge from the first turn.
+Liefert einen typisierten, sofort einfügbaren **Digest** der relevanten Regeln,
+gruppiert nach Typ (decision / convention / constraint / open_question / glossary /
+status) und pro Gruppe begrenzt. Dies ist das Tool, das zu Beginn einer Sitzung
+aufgerufen werden sollte, damit der Assistent das steuernde Wissen des Teams vom
+ersten Zug an mitführt.
 
-| Parameter | Description |
+| Parameter | Beschreibung |
 |---|---|
-| `scope` | Optional scope to focus the digest on; otherwise the relevant baseline is used. |
+| `scope` | Optionaler Scope, auf den der Digest fokussiert wird; andernfalls wird die relevante Baseline verwendet. |
 
 ---
 
 ## Notes
 
-- **Scoping to the user.** Every call runs as the authenticated user. That is why
-  the same endpoint can serve a member's private scope alongside the shared ones
-  without ever exposing one user's private memory to another — see
-  [Security & privacy](/operations/security/).
-- **Streamable HTTP.** kumbuka uses the modern MCP transport (Streamable HTTP),
-  not the older SSE transport.
+- **Beschränkung auf den Benutzer.** Jeder Aufruf läuft als der authentifizierte
+  Benutzer. Deshalb kann derselbe Endpunkt den privaten Scope eines Mitglieds
+  neben den geteilten bedienen, ohne jemals das private Gedächtnis eines Benutzers
+  einem anderen offenzulegen — siehe [Sicherheit & Datenschutz](/operations/security/).
+- **Streamable HTTP.** kumbuka verwendet den modernen MCP-Transport (Streamable
+  HTTP), nicht den älteren SSE-Transport.

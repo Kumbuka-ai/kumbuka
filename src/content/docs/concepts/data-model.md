@@ -1,80 +1,87 @@
 ---
-title: Concepts
-description: The kumbuka domain model — the memory entry, the scope it lives in, and the author that wrote it.
+title: Konzepte
+description: Das Domänenmodell von kumbuka — der Gedächtniseintrag, der Scope, in dem er lebt, und der Autor, der ihn geschrieben hat.
 ---
 
-The kumbuka domain model is small on purpose. Three ideas carry it: the **memory
-entry**, the **scope** it lives in, and the **author** that wrote it.
+Das Domänenmodell von kumbuka ist bewusst klein gehalten. Drei Ideen tragen es:
+der **Gedächtniseintrag**, der **Scope**, in dem er lebt, und der **Autor**, der
+ihn geschrieben hat.
 
-## Memory entry
+## Gedächtniseintrag
 
-One unit of remembered knowledge. An entry has:
+Eine Einheit gemerkten Wissens. Ein Eintrag hat:
 
-| Field | Meaning |
+| Feld | Bedeutung |
 |---|---|
-| `id` | A stable surrogate identifier. |
-| `scope` | The scope the entry belongs to (below). |
-| `type` | One of the six fixed types (below). |
-| `key` | Optional, lowercase, dot/kebab-namespaced — the address the assistant looks an entry up by, e.g. `db.system-of-record`. |
-| `content` | The statement itself, in plain text. |
-| `author` | A human (their authenticated identity) or the assistant (`agent`). Derived server-side — see [Authorship](#authorship). |
-| `created_at` / `updated_at` | Timestamps. |
+| `id` | Ein stabiler Surrogat-Schlüssel. |
+| `scope` | Der Scope, zu dem der Eintrag gehört (siehe unten). |
+| `type` | Einer der sechs festen Typen (siehe unten). |
+| `key` | Optional, in Kleinbuchstaben, dot/kebab-namespaced — die Adresse, über die der Assistent einen Eintrag nachschlägt, z. B. `db.system-of-record`. |
+| `content` | Die Aussage selbst, als reiner Text. |
+| `author` | Ein Mensch (dessen authentifizierte Identität) oder der Assistent (`agent`). Serverseitig abgeleitet — siehe [Autorschaft](#authorship). |
+| `created_at` / `updated_at` | Zeitstempel. |
 
-An entry is a single, legible statement — not a document. Keep it to one rule,
-decision, or definition.
+Ein Eintrag ist eine einzelne, gut lesbare Aussage — kein Dokument. Beschränke
+ihn auf eine Regel, Entscheidung oder Definition.
 
-## Entry taxonomy (fixed, six types)
+## Eintrags-Taxonomie (fest, sechs Typen)
 
-The taxonomy is intentionally small so the memory stays legible. There are
-exactly six types and they do not change:
+Die Taxonomie ist bewusst klein gehalten, damit das Gedächtnis lesbar bleibt. Es
+gibt genau sechs Typen, und sie ändern sich nicht:
 
-| Type | Use it for |
+| Typ | Wofür |
 |---|---|
-| `decision` | A settled choice the team has committed to. |
-| `convention` | A shared default way of doing things. |
-| `constraint` | A hard boundary that must not be crossed. |
-| `open_question` | Something unresolved; needs an owner and an answer. |
-| `glossary` | A term defined so everyone means the same thing. |
-| `status` | The current state of something in motion. |
+| `decision` | Eine getroffene Entscheidung, auf die sich das Team festgelegt hat. |
+| `convention` | Eine geteilte Standardvorgehensweise. |
+| `constraint` | Eine harte Grenze, die nicht überschritten werden darf. |
+| `open_question` | Etwas Ungeklärtes; braucht einen Verantwortlichen und eine Antwort. |
+| `glossary` | Ein Begriff, so definiert, dass alle dasselbe meinen. |
+| `status` | Der aktuelle Stand von etwas in Bewegung. |
 
 ## Scopes
 
-A scope is a container of entries with an access **kind**. It has a surrogate
-primary key, a unique and immutable **slug** (the address the assistant and UI
-use), a display name, a kind, a description, and an `archived` (read-only) flag.
+Ein Scope ist ein Container von Einträgen mit einer Zugriffs-**Art** (kind). Er
+hat einen Surrogat-Primärschlüssel, einen eindeutigen und unveränderlichen
+**Slug** (die Adresse, die Assistent und UI verwenden), einen Anzeigenamen, eine
+Art, eine Beschreibung und ein `archived`-Flag (schreibgeschützt).
 
-| Kind | Visibility | Notes |
+| Art | Sichtbarkeit | Hinweise |
 |---|---|---|
-| `global` | Team-wide | Exactly **one** per organization — the always-on baseline the assistant reads first. It cannot be created or removed. |
-| `project` | Team-shared | Many; carve the shared memory into spaces (e.g. `billing-platform`). Members read/write; admins manage. |
-| `private` | Owner-only | One per member. Reachable only by its owner through the MCP surface. **Never** appears in the console or any admin/team-facing API. |
+| `global` | Teamweit | Genau **einer** pro Organisation — die stets aktive Baseline, die der Assistent zuerst liest. Kann nicht erstellt oder entfernt werden. |
+| `project` | Team-geteilt | Viele; unterteilen das geteilte Gedächtnis in Räume (z. B. `billing-platform`). Mitglieder lesen/schreiben; Admins verwalten. |
+| `private` | Nur Eigentümer | Einer pro Mitglied. Nur durch seinen Eigentümer über die MCP-Oberfläche erreichbar. Erscheint **nie** in der Konsole oder einer admin-/teamseitigen API. |
 
-The single `global` scope is fixed. `project` scopes are created to organize
-shared memory; who may create them is a team policy (see
-[Configuration](/reference/configuration/)). `private` is always available to each
-member directly and is never the team's default write target.
+Der einzelne `global`-Scope ist fest. `project`-Scopes werden erstellt, um das
+geteilte Gedächtnis zu organisieren; wer sie erstellen darf, ist eine
+Team-Richtlinie (siehe [Konfiguration](/reference/configuration/)). `private`
+steht jedem Mitglied jederzeit direkt zur Verfügung und ist nie das
+Standard-Schreibziel des Teams.
 
-A scope's **slug** is immutable even across renames, so the address an assistant
-stores stays valid.
+Der **Slug** eines Scopes ist auch über Umbenennungen hinweg unveränderlich,
+sodass die Adresse, die ein Assistent speichert, gültig bleibt.
 
-## Authorship
+## Autorschaft {#authorship}
 
-An entry's author is either a human or the assistant (`agent`), and provenance
-is **derived server-side from the write channel** — never from a client-supplied
-flag:
+Der Autor eines Eintrags ist entweder ein Mensch oder der Assistent (`agent`),
+und die Herkunft wird **serverseitig aus dem Schreibkanal abgeleitet** — niemals
+aus einem vom Client gelieferten Flag:
 
-- Writes through the **console** are attributed to the signed-in human.
-- Writes through the **MCP surface** are marked "via assistant" (`source = mcp`)
-  while still recording the real human subject behind the session.
+- Schreibvorgänge über die **Konsole** werden dem angemeldeten Menschen
+  zugeschrieben.
+- Schreibvorgänge über die **MCP-Oberfläche** werden als „über Assistent"
+  markiert (`source = mcp`), wobei weiterhin das echte menschliche Subjekt hinter
+  der Sitzung erfasst wird.
 
-There is no separate login for the assistant, and no client can claim a
-different author than the channel it wrote through. The console's "agent" badge
-simply means the entry arrived over MCP.
+Es gibt keinen separaten Login für den Assistenten, und kein Client kann einen
+anderen Autor angeben als den Kanal, über den er geschrieben hat. Das
+„agent"-Abzeichen der Konsole bedeutet einfach, dass der Eintrag über MCP
+eingegangen ist.
 
-## How the assistant reads and writes
+## Wie der Assistent liest und schreibt
 
-The assistant interacts with these concepts through five MCP tools
+Der Assistent interagiert mit diesen Konzepten über fünf MCP-Tools
 (`memory_remember`, `memory_recall`, `memory_forget`, `memory_scopes`,
-`memory_load_context`). Where a new entry lands when no scope is named is
-governed by the team's default write-scope policy. See [MCP tools](/reference/mcp-tools/)
-and [Configuration](/reference/configuration/).
+`memory_load_context`). Wo ein neuer Eintrag landet, wenn kein Scope genannt
+wird, regelt die Standard-Schreib-Scope-Richtlinie des Teams. Siehe
+[MCP-Tools](/reference/mcp-tools/) und
+[Konfiguration](/reference/configuration/).

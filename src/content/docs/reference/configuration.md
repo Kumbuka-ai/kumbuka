@@ -1,82 +1,87 @@
 ---
-title: Configuration
-description: The team policies set in the console and the deployment knobs set in the environment for the Community Edition.
+title: Konfiguration
+description: Die in der Konsole festgelegten Team-Richtlinien und die in der Umgebung festgelegten Deployment-Stellschrauben der Community Edition.
 ---
 
-This page describes the configurable behavior of the Community Edition — the
-team policies set in the console and the deployment knobs set in the environment.
-The authoritative, always-current list of environment variables lives with the
-deployable stack in the
+Diese Seite beschreibt das konfigurierbare Verhalten der Community Edition — die
+in der Konsole festgelegten Team-Richtlinien und die in der Umgebung festgelegten
+Deployment-Stellschrauben. Die maßgebliche, stets aktuelle Liste der
+Umgebungsvariablen liegt beim deploybaren Stack im
 [`kumbuka-server` README](https://github.com/kumbuka-ai/kumbuka-server#quick-start-dev);
-this page explains the concepts behind them.
+diese Seite erläutert die Konzepte dahinter.
 
-## Hostnames are configuration
+## Hostnamen sind Konfiguration
 
-Hostnames are **never hardcoded**. A deployment sets its own:
+Hostnamen sind **niemals fest codiert**. Jedes Deployment legt seine eigenen fest:
 
-| Host | Purpose | Example |
+| Host | Zweck | Beispiel |
 |---|---|---|
-| Console | The admin UI | `kumbuka.ai` |
-| MCP endpoint | The `/mcp` surface AI clients connect to | `memory.kumbuka.ai` |
-| Keycloak | The identity provider / sign-in host | `auth.kumbuka.ai` |
+| Console | Die Admin-Oberfläche | `kumbuka.ai` |
+| MCP-Endpunkt | Die `/mcp`-Oberfläche, mit der sich KI-Clients verbinden | `memory.kumbuka.ai` |
+| Keycloak | Der Identity-Provider / Anmelde-Host | `auth.kumbuka.ai` |
 
-The examples above are just examples. Set yours in `.env`; Caddy provisions TLS
-for the hostnames you configure once they resolve to your host.
+Die obigen Beispiele sind nur Beispiele. Legen Sie Ihre eigenen in `.env` fest;
+Caddy stellt TLS für die von Ihnen konfigurierten Hostnamen bereit, sobald diese
+auf Ihren Host auflösen.
 
-## Team policies (set in the console)
+## Team-Richtlinien (in der Konsole festgelegt)
 
-These are runtime policies an admin manages from **Settings**. They change
-behavior immediately.
+Dies sind Laufzeit-Richtlinien, die ein Admin über die **Einstellungen**
+verwaltet. Sie ändern das Verhalten sofort.
 
-### Default write-scope policy
+### Standard-Schreib-Scope-Richtlinie
 
-Where the assistant writes when it is **not** told a scope:
+Wohin der Assistent schreibt, wenn ihm **kein** Scope mitgeteilt wird:
 
-| Value | Behavior |
+| Value | Verhalten |
 |---|---|
-| `ask` *(default)* | The assistant proposes a target and the member confirms. Safest for mixed teams. |
-| `project` | The active project scope, with a runtime fallback if it is missing. |
-| `global` | The organization-wide baseline. |
+| `ask` *(Standard)* | Der Assistent schlägt ein Ziel vor und das Mitglied bestätigt. Am sichersten für gemischte Teams. |
+| `project` | Der aktive Projekt-Scope, mit einem Laufzeit-Fallback, falls er fehlt. |
+| `global` | Die organisationsweite Baseline. |
 
-**Private is never the team default target.** It is always available to each
-member directly; the write-scope policy governs *shared* writes only.
+**Private ist niemals das Standardziel des Teams.** Es ist jedem Mitglied stets
+direkt verfügbar; die Schreibrichtlinie regelt ausschließlich *geteilte*
+Schreibvorgänge.
 
-### Who may create project scopes
+### Wer Projekt-Scopes erstellen darf
 
-| Value | Behavior |
+| Value | Verhalten |
 |---|---|
-| `admins` *(default)* | Only admins create new `project` scopes. |
-| `members` | Any member may create `project` scopes. |
+| `admins` *(Standard)* | Nur Admins erstellen neue `project`-Scopes. |
+| `members` | Jedes Mitglied darf `project`-Scopes erstellen. |
 
-The single `global` scope is fixed — it cannot be created or removed regardless
-of this policy.
+Der einzelne `global`-Scope ist fest — er kann unabhängig von dieser Richtlinie
+weder erstellt noch entfernt werden.
 
-### Invalid default scope (runtime fallback)
+### Ungültiger Standard-Scope (Laufzeit-Fallback)
 
-If the configured default scope becomes invalid (for example it was archived or
-deleted), the backend falls back to **`ask` at runtime without mutating the
-stored configuration**, shows an admin banner, and warns proactively at
-archive/delete time. The stored policy is left intact so it can be corrected
-deliberately.
+Wird der konfigurierte Standard-Scope ungültig (zum Beispiel weil er archiviert
+oder gelöscht wurde), fällt das Backend **zur Laufzeit auf `ask` zurück, ohne die
+gespeicherte Konfiguration zu verändern**, zeigt ein Admin-Banner und warnt
+proaktiv beim Archivieren/Löschen. Die gespeicherte Richtlinie bleibt intakt,
+damit sie bewusst korrigiert werden kann.
 
-### Connector details
+### Connector-Details
 
-The **Settings → connector** card shows the endpoint URL, the client id, a masked
-client secret, and a **rotate** action. Rotating the secret **invalidates the old
-one immediately** — it is the connector-level kill-switch.
+Die **Einstellungen → connector**-Karte zeigt die Endpunkt-URL, die Client-ID,
+ein maskiertes Client-Secret und eine **rotate**-Aktion. Das Rotieren des Secrets
+**macht das alte sofort ungültig** — es ist der Notausschalter auf
+Connector-Ebene.
 
-## Deployment knobs (set in `.env`)
+## Deployment-Stellschrauben (in `.env` festgelegt)
 
-Set in the environment before `docker compose up`. Typical categories (see the
-`kumbuka-server` README for exact names and defaults):
+In der Umgebung vor `docker compose up` festgelegt. Typische Kategorien (siehe das
+`kumbuka-server` README für genaue Namen und Standardwerte):
 
-- **Domain / hostnames** — the three hosts above.
-- **Secrets** — database credentials, Keycloak admin and client secrets, the
-  connector secret. Use strong values for anything internet-facing.
-- **Database** — PostgreSQL connection settings (the app DB is `kumbuka`; schema
-  is managed by Flyway).
-- **Identity** — Keycloak realm and client configuration (realm `kumbuka`;
-  clients `kumbuka-backend`, `kumbuka-admin`, `kumbuka-connector`).
+- **Domain / Hostnamen** — die drei oben genannten Hosts.
+- **Secrets** — Datenbank-Anmeldedaten, Keycloak-Admin- und Client-Secrets, das
+  Connector-Secret. Verwenden Sie starke Werte für alles, was aus dem Internet
+  erreichbar ist.
+- **Datenbank** — PostgreSQL-Verbindungseinstellungen (die App-DB ist `kumbuka`;
+  das Schema wird von Flyway verwaltet).
+- **Identität** — Keycloak-Realm- und Client-Konfiguration (Realm `kumbuka`;
+  Clients `kumbuka-backend`, `kumbuka-admin`, `kumbuka-connector`).
 
-See [Quickstart](/get-started/quickstart/) to put these together for a first run, and
-[Security & privacy](/operations/security/) for the invariants a configuration must not break.
+Siehe [Schnellstart](/get-started/quickstart/), um diese für einen ersten Lauf
+zusammenzustellen, und [Sicherheit & Datenschutz](/operations/security/) für die
+Invarianten, die eine Konfiguration nicht verletzen darf.

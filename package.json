@@ -19,6 +19,8 @@
   "dependencies": {
     "@astrojs/starlight": "^0.34.0",
     "astro": "^5.13.0",
+    "astro-mermaid": "^1.0.0",
+    "mermaid": "^11.0.0",
     "remark-heading-id": "^1.0.1",
     "sharp": "^0.34.0"
   },

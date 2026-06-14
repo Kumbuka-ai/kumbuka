@@ -1,69 +1,73 @@
 ---
-title: Connecting an assistant
-description: How to add kumbuka as a custom MCP connector in claude.ai and what an assistant can do once it is live.
+title: Einen Assistenten verbinden
+description: Wie Sie kumbuka als benutzerdefinierten MCP-Connector in claude.ai hinzufügen und was ein Assistent kann, sobald er aktiv ist.
 ---
 
-kumbuka is reached by an AI client as a **custom MCP connector**: an endpoint
-URL, a client id, and a client secret. Once connected, the assistant can call the
-memory tools on your behalf — including your own private scope, because the
-connection is scoped to *you*, the authenticated user.
+kumbuka wird von einem KI-Client als **benutzerdefinierter MCP-Connector**
+erreicht: eine Endpunkt-URL, eine Client-ID und ein Client-Secret. Sobald die
+Verbindung besteht, kann der Assistent die Gedächtnis-Tools in Ihrem Namen
+aufrufen — einschließlich Ihres eigenen privaten Scopes, denn die Verbindung ist
+auf *Sie*, den authentifizierten Benutzer, beschränkt.
 
-This page covers adding the connector in **claude.ai**. For Claude Desktop,
-Claude Code, and Claude Mobile, see the
-[`kumbuka-server` guide](https://github.com/kumbuka-ai/kumbuka-server#connecting-claude-clients).
+Diese Seite beschreibt das Hinzufügen des Connectors in **claude.ai**. Für Claude
+Desktop, Claude Code und Claude Mobile siehe die
+[`kumbuka-server`-Anleitung](https://github.com/kumbuka-ai/kumbuka-server#connecting-claude-clients).
 
-## What you need
+## Was Sie benötigen
 
-From the admin console's **Settings → connector** card (or from your
-administrator):
+Aus der Karte **Settings → connector** der Admin-Konsole (oder von Ihrem
+Administrator):
 
-- **Endpoint URL** — the `/mcp` address, e.g. `https://memory.kumbuka.ai/mcp`
-  (your deployment's host; it is configuration, not a fixed value).
-- **Client id** — the connector's OAuth client id (`kumbuka-connector`).
-- **Client secret** — a confidential secret. It can be rotated from the console,
-  which immediately invalidates the old one.
+- **Endpunkt-URL** — die `/mcp`-Adresse, z. B. `https://memory.kumbuka.ai/mcp`
+  (der Host Ihrer Bereitstellung; sie ist Konfiguration, kein fester Wert).
+- **Client-ID** — die OAuth-Client-ID des Connectors (`kumbuka-connector`).
+- **Client-Secret** — ein vertrauliches Secret. Es kann über die Konsole rotiert
+  werden, was das alte sofort ungültig macht.
 
-> Remote MCP connectors in claude.ai require a paid plan. A server added on the
-> web is inherited by Claude Mobile.
+> Remote-MCP-Connectoren in claude.ai erfordern einen kostenpflichtigen Plan. Ein
+> im Web hinzugefügter Server wird von Claude Mobile übernommen.
 
-## Add it in claude.ai
+## In claude.ai hinzufügen
 
-1. Go to **Settings → Connectors → Add custom connector**.
-2. Enter the **endpoint URL** and the **client id** / **client secret** from the
-   connector card.
-3. Save, then **Connect**. claude.ai discovers the authorization server from the
-   endpoint and starts the OAuth flow.
-4. **Sign in** at your Keycloak host (e.g. `https://auth.kumbuka.ai`) and approve
-   access. You are redirected back and the connector goes live.
+1. Gehen Sie zu **Settings → Connectors → Add custom connector**.
+2. Geben Sie die **Endpunkt-URL** und die **Client-ID** / das **Client-Secret**
+   aus der Connector-Karte ein.
+3. Speichern Sie und klicken Sie dann auf **Connect**. claude.ai ermittelt den
+   Autorisierungsserver aus dem Endpunkt und startet den OAuth-Flow.
+4. **Melden Sie sich** an Ihrem Keycloak-Host an (z. B. `https://auth.kumbuka.ai`)
+   und genehmigen Sie den Zugriff. Sie werden zurückgeleitet und der Connector
+   wird aktiv.
 
-### What happens under the hood
+### Was im Hintergrund passiert
 
-The connector is a confidential client that also sends **PKCE**. claude.ai
-discovers the authorization server via OAuth Protected Resource Metadata
-(`/.well-known/oauth-protected-resource` → the `kumbuka` Keycloak realm), runs
-the authorization-code flow, and then calls `/mcp` with an audience-bound bearer
-token. The token's subject is *you*; your realm role (`member` or `admin`)
-determines what you may do. See [Architecture](/operations/architecture/) for the full
-auth topology.
+Der Connector ist ein vertraulicher Client, der zusätzlich **PKCE** sendet.
+claude.ai ermittelt den Autorisierungsserver über OAuth Protected Resource
+Metadata (`/.well-known/oauth-protected-resource` → der Keycloak-Realm `kumbuka`),
+durchläuft den Authorization-Code-Flow und ruft dann `/mcp` mit einem
+audience-gebundenen Bearer-Token auf. Das Subject des Tokens sind *Sie*; Ihre
+Realm-Rolle (`member` oder `admin`) bestimmt, was Sie tun dürfen. Siehe
+[Architektur](/operations/architecture/) für die vollständige Auth-Topologie.
 
-## What the assistant can then do
+## Was der Assistent dann tun kann
 
-With the connector live, the assistant has the five `memory_*` tools (full
-reference in [MCP tools](/reference/mcp-tools/)):
+Mit aktivem Connector verfügt der Assistent über die fünf `memory_*`-Tools
+(vollständige Referenz unter [MCP-Tools](/reference/mcp-tools/)):
 
-- **Load context** at the start of a session with `memory_load_context` — a
-  typed digest of the rules that should steer its work.
-- **Recall** specific entries with `memory_recall` (filter by scope, type, or a
-  substring).
-- **Remember** new decisions, conventions, or status with `memory_remember`.
-- **Forget** entries that no longer hold with `memory_forget`.
-- **List scopes** it can see with `memory_scopes` — including your private scope,
-  which only you can reach.
+- **Kontext laden** zu Beginn einer Sitzung mit `memory_load_context` — ein
+  typisierter Auszug der Regeln, die seine Arbeit steuern sollen.
+- **Abrufen** bestimmter Einträge mit `memory_recall` (Filter nach Scope, Typ
+  oder einer Teilzeichenkette).
+- **Merken** neuer Entscheidungen, Konventionen oder Status mit
+  `memory_remember`.
+- **Vergessen** von Einträgen, die nicht mehr gelten, mit `memory_forget`.
+- **Scopes auflisten**, die er sehen kann, mit `memory_scopes` — einschließlich
+  Ihres privaten Scopes, den nur Sie erreichen können.
 
-Where a new memory lands when you don't name a scope is governed by the team's
-default write-scope policy (`ask` by default — the assistant proposes and you
-confirm). See [Configuration](/reference/configuration/).
+Wo ein neues Gedächtnis landet, wenn Sie keinen Scope angeben, wird durch die
+Standard-Schreib-Scope-Richtlinie des Teams bestimmt (`ask` als Standard — der
+Assistent schlägt vor und Sie bestätigen). Siehe
+[Konfiguration](/reference/configuration/).
 
-A good first move in a project is to tell the assistant to call
-`memory_load_context` at session start, so it applies the team's steering
-knowledge without being re-told.
+Ein guter erster Schritt in einem Projekt ist, den Assistenten anzuweisen, zu
+Sitzungsbeginn `memory_load_context` aufzurufen, damit er das steuernde Wissen
+des Teams anwendet, ohne dass es ihm erneut erklärt werden muss.

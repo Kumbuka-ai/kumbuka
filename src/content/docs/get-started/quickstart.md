@@ -1,36 +1,36 @@
 ---
-title: Quickstart
-description: Self-host the Community Edition as a single Docker Compose stack.
+title: Schnellstart
+description: Hosten Sie die Community Edition selbst als einzelnen Docker-Compose-Stack.
 ---
 
-The Community Edition is the free, self-hosted, single-tenant memory core. It
-runs as a single Docker Compose stack: the Quarkus backend, PostgreSQL, Keycloak
-(the identity provider), a Caddy edge, and the Next.js admin console served at
-the root path.
+Die Community Edition ist der kostenlose, selbst gehostete, mandantenfreie
+Gedächtniskern. Sie läuft als einzelner Docker-Compose-Stack: das Quarkus-Backend,
+PostgreSQL, Keycloak (der Identitätsanbieter), ein Caddy-Edge und die Next.js-Admin-Konsole,
+die unter dem Wurzelpfad ausgeliefert wird.
 
-The deployable stack lives in the
-[`kumbuka-server`](https://github.com/kumbuka-ai/kumbuka-server) repository. This
-page is the project-level walkthrough; the
-[`kumbuka-server` runbook](https://github.com/kumbuka-ai/kumbuka-server#quick-start-dev)
-is the authoritative, always-current reference for environment variables and
-production deployment.
+Der bereitstellbare Stack liegt im Repository
+[`kumbuka-server`](https://github.com/kumbuka-ai/kumbuka-server). Diese
+Seite ist die Einführung auf Projektebene; das
+[`kumbuka-server`-Runbook](https://github.com/kumbuka-ai/kumbuka-server#quick-start-dev)
+ist die maßgebliche, stets aktuelle Referenz für Umgebungsvariablen und die
+Produktivbereitstellung.
 
-## Prerequisites
+## Voraussetzungen
 
-- **Docker** and **Docker Compose** (a recent Docker Engine includes Compose v2).
-- A host you can reach, and — for a real connector from claude.ai — **DNS and
-  TLS** for the hostnames you configure. Caddy provisions certificates
-  automatically when the hostnames resolve to your host.
+- **Docker** und **Docker Compose** (eine aktuelle Docker Engine enthält Compose v2).
+- Ein erreichbarer Host und — für einen echten Connector von claude.ai — **DNS und
+  TLS** für die von Ihnen konfigurierten Hostnamen. Caddy stellt Zertifikate
+  automatisch bereit, sobald die Hostnamen auf Ihren Host auflösen.
 
-The hostnames are configuration, never hardcoded (see
-[Configuration](/reference/configuration/)). The defaults referenced below —
-`kumbuka.ai`, `memory.kumbuka.ai`, `auth.kumbuka.ai` — are examples; set your
-own.
+Die Hostnamen sind Konfiguration, niemals fest verdrahtet (siehe
+[Konfiguration](/reference/configuration/)). Die unten genannten Standardwerte —
+`kumbuka.ai`, `memory.kumbuka.ai`, `auth.kumbuka.ai` — sind Beispiele; legen Sie
+Ihre eigenen fest.
 
-## 1. Get the stack
+## 1. Den Stack beschaffen
 
-Clone the server and the console **side by side** — the console is wired into the
-server's compose stack by a relative path (step 4):
+Klonen Sie den Server und die Konsole **nebeneinander** — die Konsole ist über
+einen relativen Pfad in den Compose-Stack des Servers eingebunden (Schritt 4):
 
 ```bash
 git clone https://github.com/kumbuka-ai/kumbuka-server
@@ -38,43 +38,45 @@ git clone https://github.com/kumbuka-ai/kumbuka-console
 cd kumbuka-server
 ```
 
-## 2. Configure
+## 2. Konfigurieren
 
 ```bash
 cp .env.example .env
 ```
 
-Edit `.env` and set at least your domain and the secrets. For local development
-you can accept the dev defaults; for anything internet-facing, set real
-hostnames and strong secrets. The full list of knobs is documented in
-[Configuration](/reference/configuration/) and in the
-[`kumbuka-server` README](https://github.com/kumbuka-ai/kumbuka-server#quick-start-dev).
+Bearbeiten Sie `.env` und setzen Sie mindestens Ihre Domain und die Secrets. Für
+die lokale Entwicklung können Sie die Dev-Standardwerte übernehmen; für alles, was
+über das Internet erreichbar ist, setzen Sie echte Hostnamen und starke Secrets.
+Die vollständige Liste der Stellschrauben ist in
+[Konfiguration](/reference/configuration/) und in der
+[`kumbuka-server`-README](https://github.com/kumbuka-ai/kumbuka-server#quick-start-dev)
+dokumentiert.
 
-## 3. Start the backend stack
+## 3. Den Backend-Stack starten
 
-The backend services are gated behind the `app` Compose profile:
+Die Backend-Dienste sind hinter dem Compose-Profil `app` gekapselt:
 
 ```bash
 docker compose --profile app up -d
 ```
 
-This brings up the backend, PostgreSQL, Keycloak (with the `kumbuka` realm
-imported), and Caddy. Check health and logs:
+Dies startet das Backend, PostgreSQL, Keycloak (mit importiertem `kumbuka`-Realm)
+und Caddy. Prüfen Sie Zustand und Logs:
 
 ```bash
 docker compose ps
 docker compose logs -f kumbuka-backend
 ```
 
-At this point the admin API and the `/mcp` endpoint are live, but the **root
-path (`/`) returns a 502** — that is the expected "backend-only" state until you
-add the console in the next step.
+Zu diesem Zeitpunkt sind die Admin-API und der `/mcp`-Endpunkt aktiv, aber der
+**Wurzelpfad (`/`) liefert einen 502** — das ist der erwartete „Backend-only“-Zustand,
+bis Sie im nächsten Schritt die Konsole hinzufügen.
 
-## 4. Add the admin console
+## 4. Die Admin-Konsole hinzufügen
 
-The console (a Next.js BFF) lives in its own repository and is wired into the
-same stack with a `compose.override.yml` in the `kumbuka-server` directory.
-Compose merges this file automatically:
+Die Konsole (ein Next.js-BFF) liegt in einem eigenen Repository und wird über eine
+`compose.override.yml` im Verzeichnis `kumbuka-server` in denselben Stack
+eingebunden. Compose führt diese Datei automatisch zusammen:
 
 ```yaml
 # kumbuka-server/compose.override.yml
@@ -89,42 +91,44 @@ services:
     profiles: ["app"]
 ```
 
-Caddy already proxies the root path to this service, so no routing changes are
-needed. Bring the console up with the same command — Compose picks up the
-override:
+Caddy leitet den Wurzelpfad bereits an diesen Dienst weiter, sodass keine
+Routing-Änderungen nötig sind. Starten Sie die Konsole mit demselben Befehl —
+Compose übernimmt das Override:
 
 ```bash
 docker compose --profile app up -d
 ```
 
-The root path now serves the console. It binds only to the internal Docker
-network; Caddy remains the sole public entry point. (For local development
-against a live or mock backend without Docker, see the
-[`kumbuka-console` README](https://github.com/kumbuka-ai/kumbuka-console#running).)
+Der Wurzelpfad liefert nun die Konsole. Sie bindet sich nur an das interne
+Docker-Netzwerk; Caddy bleibt der einzige öffentliche Einstiegspunkt. (Für die
+lokale Entwicklung gegen ein laufendes oder gemocktes Backend ohne Docker siehe
+die [`kumbuka-console`-README](https://github.com/kumbuka-ai/kumbuka-console#running).)
 
-## 5. First run
+## 5. Erster Start
 
-1. **Sign in to the admin console** at your configured console host (e.g.
-   `https://kumbuka.ai`). The first administrator is provisioned during stack
-   setup — see the `kumbuka-server` runbook for the exact bootstrap step.
-2. **Confirm the `global` scope** exists — it is the always-on baseline; there is
-   exactly one and it cannot be removed.
-3. **Create a `project` scope** or two if you want to organize shared memory
-   (e.g. `billing-platform`).
-4. **Invite teammates** from **Team & users**; each gets an enrolment link from
-   Keycloak (no password is set on their behalf).
-5. **Open the connector card** in **Settings** to get the endpoint URL, client
-   id, and client secret you will hand to an AI client.
+1. **Melden Sie sich an der Admin-Konsole an** unter Ihrem konfigurierten
+   Konsolen-Host (z. B. `https://kumbuka.ai`). Der erste Administrator wird während
+   der Stack-Einrichtung bereitgestellt — den genauen Bootstrap-Schritt finden Sie
+   im `kumbuka-server`-Runbook.
+2. **Bestätigen Sie, dass der `global`-Scope existiert** — er ist die stets aktive
+   Grundlage; es gibt genau einen, und er kann nicht entfernt werden.
+3. **Erstellen Sie einen `project`-Scope** oder zwei, wenn Sie das geteilte
+   Gedächtnis organisieren möchten (z. B. `billing-platform`).
+4. **Laden Sie Teammitglieder ein** über **Team & users**; jedes erhält einen
+   Registrierungslink von Keycloak (es wird kein Passwort in ihrem Namen gesetzt).
+5. **Öffnen Sie die Connector-Karte** unter **Settings**, um die Endpunkt-URL, die
+   Client-ID und das Client-Secret zu erhalten, die Sie einem AI-Client übergeben.
 
-## 6. Connect an assistant
+## 6. Einen Assistenten verbinden
 
-With the stack up and the connector details in hand, add kumbuka to your AI
-client — see [Connecting an assistant](/get-started/connecting-an-assistant/).
+Sobald der Stack läuft und Sie die Connector-Details zur Hand haben, fügen Sie
+kumbuka zu Ihrem AI-Client hinzu — siehe
+[Einen Assistenten verbinden](/get-started/connecting-an-assistant/).
 
-## Next steps
+## Nächste Schritte
 
-- [Configuration](/reference/configuration/) — policies and environment knobs.
-- [Architecture](/operations/architecture/) — what each container does and how requests
-  flow.
-- [Security & privacy](/operations/security/) — the private guarantee and the operational
-  invariants to uphold.
+- [Konfiguration](/reference/configuration/) — Richtlinien und Umgebungs-Stellschrauben.
+- [Architektur](/operations/architecture/) — was jeder Container tut und wie Anfragen
+  fließen.
+- [Sicherheit & Datenschutz](/operations/security/) — die Garantie des privaten
+  Gedächtnisses und die operativen Invarianten, die einzuhalten sind.

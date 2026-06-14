@@ -1,25 +1,25 @@
 ---
-title: Architecture
-description: The single Docker Compose stack — its components, topology, the backend's two OIDC roles, and how requests flow through it.
+title: Architektur
+description: Der einzelne Docker-Compose-Stack — seine Komponenten, die Topologie, die zwei OIDC-Rollen des Backends und der Anfrage-Fluss durch das System.
 ---
 
-kumbuka is a single **Docker Compose** stack. One backend serves both the AI-
-facing MCP surface and the team-facing admin API; it is the only component that
-talks to the identity provider. Everything else is a well-understood building
-block: PostgreSQL for storage, Keycloak for identity, Caddy at the edge, and a
-Next.js console for the team.
+kumbuka ist ein einzelner **Docker-Compose**-Stack. Ein Backend bedient sowohl
+die KI-gerichtete MCP-Oberfläche als auch die team-gerichtete Admin-API; es ist
+die einzige Komponente, die mit dem Identity-Provider kommuniziert. Alles andere
+ist ein gut verstandener Baustein: PostgreSQL als Speicher, Keycloak für
+Identität, Caddy am Rand und eine Next.js-Konsole für das Team.
 
-## Components
+## Komponenten
 
-| Component | Role |
+| Komponente | Rolle |
 |---|---|
-| **Backend** — Quarkus / Java 21 | Serves `/mcp` (Streamable HTTP) and the admin REST API. The **only** component that talks to Keycloak. Uses Hibernate ORM + Panache over JDBC, with Flyway migrations and SmallRye health. |
-| **PostgreSQL** | System of record for memory entries and scopes. Schema is managed by Flyway. |
-| **Keycloak** | Identity provider, run **headless** — the realm is imported at startup and users are provisioned through the Admin API. OAuth 2.1 is mandatory for the remote MCP surface. |
-| **Next.js admin console** | The team-facing UI. A **BFF client** — it never holds tokens (see below). |
-| **Caddy** | Edge router and automatic TLS. Routes the console, the `/mcp` endpoint, and the auth host. |
+| **Backend** — Quarkus / Java 21 | Bedient `/mcp` (Streamable HTTP) und die Admin-REST-API. Die **einzige** Komponente, die mit Keycloak kommuniziert. Nutzt Hibernate ORM + Panache über JDBC, mit Flyway-Migrationen und SmallRye-Health. |
+| **PostgreSQL** | System of Record für Memory-Einträge und Scopes. Das Schema wird von Flyway verwaltet. |
+| **Keycloak** | Identity-Provider, **headless** betrieben — der Realm wird beim Start importiert und Benutzer werden über die Admin-API bereitgestellt. OAuth 2.1 ist für die entfernte MCP-Oberfläche verpflichtend. |
+| **Next.js-Admin-Konsole** | Die team-gerichtete UI. Ein **BFF-Client** — sie hält niemals Tokens (siehe unten). |
+| **Caddy** | Edge-Router und automatisches TLS. Leitet die Konsole, den `/mcp`-Endpunkt und den Auth-Host weiter. |
 
-## Topology
+## Topologie
 
 ```mermaid
 flowchart TD
@@ -47,58 +47,62 @@ flowchart TD
     S -- "JDBC + Flyway" --> P
 ```
 
-## The two OIDC roles
+## Die zwei OIDC-Rollen
 
-The backend plays **two** distinct OIDC roles against the Keycloak realm
-`kumbuka`. This is the part worth understanding.
+Das Backend spielt **zwei** verschiedene OIDC-Rollen gegenüber dem Keycloak-Realm
+`kumbuka`. Das ist der Teil, der es wert ist, verstanden zu werden.
 
-1. **Resource server (bearer)** for `/mcp`. AI clients discover the authorization
-   server via **Protected Resource Metadata**
-   (`/.well-known/oauth-protected-resource` → the Keycloak `kumbuka` realm) and
-   present **audience-bound bearer tokens**. The token's subject is the acting
-   user; the realm role (`member` / `admin`) drives authorization. Each `/mcp`
-   call therefore runs as a specific authenticated user, which is what lets the
-   same endpoint serve that user's private scope safely.
+1. **Resource Server (Bearer)** für `/mcp`. KI-Clients entdecken den
+   Autorisierungsserver über **Protected Resource Metadata**
+   (`/.well-known/oauth-protected-resource` → den Keycloak-`kumbuka`-Realm) und
+   präsentieren **audience-gebundene Bearer-Tokens**. Das Subject des Tokens ist
+   der handelnde Benutzer; die Realm-Rolle (`member` / `admin`) steuert die
+   Autorisierung. Jeder `/mcp`-Aufruf läuft daher als ein bestimmter
+   authentifizierter Benutzer, was es ermöglicht, dass derselbe Endpunkt den
+   privaten Scope dieses Benutzers sicher bedient.
 
-2. **Confidential web-app client (BFF)** for the console (`kumbuka-admin`). The
-   browser is redirected to Keycloak and back to a backend callback; the backend
-   holds the OIDC session and issues an **HttpOnly cookie**. **The frontend never
-   holds tokens and never calls Keycloak directly** (except being redirected
-   there to sign in). Every privileged call the console makes is brokered by the
-   backend.
+2. **Confidential-Web-App-Client (BFF)** für die Konsole (`kumbuka-admin`). Der
+   Browser wird zu Keycloak und zurück zu einem Backend-Callback umgeleitet; das
+   Backend hält die OIDC-Session und stellt ein **HttpOnly-Cookie** aus. **Das
+   Frontend hält niemals Tokens und ruft Keycloak niemals direkt auf** (außer der
+   Umleitung dorthin zur Anmeldung). Jeder privilegierte Aufruf der Konsole wird
+   vom Backend vermittelt.
 
-### The claude.ai connector
+### Der claude.ai-Connector
 
-The connector client (`kumbuka-connector`) is **confidential + PKCE**. PKCE is
-sent regardless of client type; the client secret provides a real
-connector-level kill-switch (rotate it to revoke access) and matches claude.ai's
-pre-registered id-plus-secret path. See
-[Connecting an assistant](/get-started/connecting-an-assistant/).
+Der Connector-Client (`kumbuka-connector`) ist **confidential + PKCE**. PKCE wird
+unabhängig vom Client-Typ gesendet; das Client-Secret bietet einen echten
+Connector-weiten Kill-Switch (durch Rotieren wird der Zugriff widerrufen) und
+entspricht dem von claude.ai vorregistrierten Pfad aus ID plus Secret. Siehe
+[Einen Assistenten verbinden](/get-started/connecting-an-assistant/).
 
-## Data flow
+## Datenfluss
 
-- **An assistant reads/writes memory:** AI client → Caddy → `/mcp` on the
-  backend (bearer token) → PostgreSQL. The user's identity on the token
-  determines which scopes are visible, including their own private scope.
-- **The team curates shared memory:** browser → Caddy → console → backend
-  (session cookie) → admin REST API → PostgreSQL. **The console's read paths
-  never return private entries** — there is no code path from an admin/team
-  surface to anyone's private rows.
-- **Identity operations** (invite, enable/disable, roles, connector-secret
-  rotation) go through the backend's confidential service-account client to
-  Keycloak. The frontend has zero Keycloak knowledge.
+- **Ein Assistent liest/schreibt Memory:** KI-Client → Caddy → `/mcp` auf dem
+  Backend (Bearer-Token) → PostgreSQL. Die Identität des Benutzers im Token
+  bestimmt, welche Scopes sichtbar sind, einschließlich seines eigenen privaten
+  Scopes.
+- **Das Team kuratiert geteiltes Memory:** Browser → Caddy → Konsole → Backend
+  (Session-Cookie) → Admin-REST-API → PostgreSQL. **Die Lesepfade der Konsole
+  geben niemals private Einträge zurück** — es gibt keinen Codepfad von einer
+  Admin-/Team-Oberfläche zu den privaten Zeilen einer Person.
+- **Identitätsoperationen** (Einladen, Aktivieren/Deaktivieren, Rollen, Rotation
+  des Connector-Secrets) laufen über den vertraulichen
+  Service-Account-Client des Backends zu Keycloak. Das Frontend hat null
+  Keycloak-Wissen.
 
-## Access control, in one line
+## Zugriffskontrolle, in einer Zeile
 
-`private` is readable/writable only by its owner via the MCP surface; `global`
-and `project` are team-shared (members read, admins manage); authorship is
-server-derived from the write channel. The private rule is enforced at the
-**data-access layer**, not in the UI — see [Security & privacy](/operations/security/).
+`private` ist nur von seinem Eigentümer über die MCP-Oberfläche lesbar/schreibbar;
+`global` und `project` sind team-geteilt (Members lesen, Admins verwalten); die
+Urheberschaft wird serverseitig aus dem Schreibkanal abgeleitet. Die
+private Regel wird auf der **Datenzugriffsebene** durchgesetzt, nicht in der UI —
+siehe [Sicherheit & Datenschutz](/operations/security/).
 
-## Naming
+## Benennung
 
-Anything that names the product, org, or a deployable is branded `kumbuka`:
-groupId `ai.kumbuka`, artifact `kumbuka-server`, npm `@kumbuka-ai/console`,
-images `ghcr.io/kumbuka-ai/*`, compose services `kumbuka-backend` /
-`kumbuka-console`, Keycloak realm `kumbuka`. The one deliberate exception is the
-MCP tool verbs, which stay functional (`memory_*`).
+Alles, was das Produkt, die Organisation oder ein Deployable benennt, trägt die
+Marke `kumbuka`: groupId `ai.kumbuka`, Artefakt `kumbuka-server`, npm
+`@kumbuka-ai/console`, Images `ghcr.io/kumbuka-ai/*`, Compose-Services
+`kumbuka-backend` / `kumbuka-console`, Keycloak-Realm `kumbuka`. Die eine
+bewusste Ausnahme sind die MCP-Tool-Verben, die funktional bleiben (`memory_*`).

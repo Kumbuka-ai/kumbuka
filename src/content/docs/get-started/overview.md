@@ -1,62 +1,66 @@
 ---
-title: Overview
-description: What kumbuka is, the personal/shared boundary that defines it, and where it runs.
+title: Überblick
+description: Was kumbuka ist, die persönliche/geteilte Grenze, die es definiert, und wo es läuft.
 ---
 
-kumbuka is an open-source **team memory system for AI assistants**. It gives a
-team a durable, shared place for the knowledge an assistant should carry across
-conversations, and serves that knowledge to MCP-capable AI clients over a remote
-server. A web admin console lets the team curate it.
+kumbuka ist ein quelloffenes **Team-Gedächtnis-System für KI-Assistenten**. Es
+gibt einem Team einen dauerhaften, geteilten Ort für das Wissen, das ein
+Assistent über Konversationen hinweg mitführen sollte, und stellt dieses Wissen
+MCP-fähigen KI-Clients über einen Remote-Server bereit. Eine Web-Admin-Konsole
+ermöglicht es dem Team, es zu kuratieren.
 
-This page orients you. For the precise domain model see
-[Concepts](/concepts/data-model/); for how an assistant calls it see the
-[MCP tools](/reference/mcp-tools/).
+Diese Seite gibt dir Orientierung. Das genaue Domänenmodell findest du unter
+[Konzepte](/concepts/data-model/); wie ein Assistent es aufruft, zeigen die
+[MCP-Tools](/reference/mcp-tools/).
 
-## What it is for
+## Wofür es da ist
 
-Teams using AI assistants re-explain the same steering knowledge in every
-session — the decisions, conventions, and constraints that should shape how the
-assistant works. kumbuka turns that into a first-class, team-owned asset so it is
-applied without being re-told.
+Teams, die KI-Assistenten nutzen, erklären in jeder Sitzung dasselbe steuernde
+Wissen erneut — die Entscheidungen, Konventionen und Einschränkungen, die prägen
+sollten, wie der Assistent arbeitet. kumbuka macht daraus ein erstklassiges,
+teameigenes Gut, sodass es angewendet wird, ohne erneut erzählt zu werden.
 
-It captures **work-steering knowledge**, deliberately small and typed:
+Es erfasst **arbeitssteuerndes Wissen**, bewusst klein und typisiert:
 
-- the rules and definitions that guide how the assistant works, **not** a copy
-  of the team's documents or source (those stay in their own systems);
-- shared and curatable, so the team sees and edits what the assistant relies on
-  rather than each person accumulating an opaque, divergent context;
-- portable, so any MCP-capable assistant reads and writes it through one
-  endpoint.
+- die Regeln und Definitionen, die leiten, wie der Assistent arbeitet, **nicht**
+  eine Kopie der Dokumente oder Quellen des Teams (diese verbleiben in ihren
+  eigenen Systemen);
+- geteilt und kuratierbar, sodass das Team sieht und bearbeitet, worauf sich der
+  Assistent stützt, statt dass jede Person einen undurchsichtigen, divergierenden
+  Kontext ansammelt;
+- portabel, sodass jeder MCP-fähige Assistent es über einen Endpunkt liest und
+  schreibt.
 
-## The personal / shared boundary
+## Die persönliche / geteilte Grenze
 
-kumbuka has two halves, and the line between them is the product's defining
-principle.
+kumbuka hat zwei Hälften, und die Linie zwischen ihnen ist das definierende
+Prinzip des Produkts.
 
-- **Shared memory** is what the team curates together — the `global` baseline
-  and any number of `project` scopes. It is visible in the console and editable
-  by the team according to role.
-- **Private memory** is each member's own working space. It is reachable **only**
-  by that member, **only** through their own authenticated MCP session. No admin,
-  no console screen, and no team-facing API can read it. This is enforced
-  structurally, not by a setting (see [Security & privacy](/operations/security/)).
+- **Geteiltes Gedächtnis** ist das, was das Team gemeinsam kuratiert — die
+  `global`-Basis und beliebig viele `project`-Scopes. Es ist in der Konsole
+  sichtbar und vom Team gemäß Rolle bearbeitbar.
+- **Privates Gedächtnis** ist der eigene Arbeitsbereich jedes Mitglieds. Es ist
+  **nur** durch dieses Mitglied erreichbar, **nur** über dessen eigene
+  authentifizierte MCP-Sitzung. Kein Administrator, keine Konsolenansicht und
+  keine teamseitige API kann es lesen. Dies wird strukturell durchgesetzt, nicht
+  durch eine Einstellung (siehe [Sicherheit & Datenschutz](/operations/security/)).
 
-When the two ever appear to conflict, the private guarantee wins over
-convenience.
+Wenn die beiden jemals in Konflikt zu geraten scheinen, gewinnt die Garantie des
+privaten Gedächtnisses über die Bequemlichkeit.
 
-## Where it runs
+## Wo es läuft
 
-kumbuka is a single Docker Compose stack: a Quarkus backend, PostgreSQL,
-Keycloak (the identity provider), and a Caddy edge, with the Next.js admin
-console. The deployable stack lives in
-[`kumbuka-server`](https://github.com/kumbuka-ai/kumbuka-server). See the
-[Quickstart](/get-started/quickstart/) to self-host it and the
-[Architecture](/operations/architecture/) for the topology.
+kumbuka ist ein einziger Docker-Compose-Stack: ein Quarkus-Backend, PostgreSQL,
+Keycloak (der Identitätsanbieter) und ein Caddy-Edge, mit der Next.js-Admin-Konsole.
+Der bereitstellbare Stack lebt in
+[`kumbuka-server`](https://github.com/kumbuka-ai/kumbuka-server). Siehe den
+[Schnellstart](/get-started/quickstart/), um ihn selbst zu hosten, und die
+[Architektur](/operations/architecture/) für die Topologie.
 
-## Editions
+## Editionen
 
-The **Community Edition** documented here is the free, self-hosted, single-tenant
-memory core. A commercial path (multi-tenancy, the Context Documents extension, a
-moderation add-on, and hosted SaaS) is planned but pre-beta — see
-[Editions](/concepts/editions/). It is described honestly: no overclaiming, no
-prices, no dates.
+Die hier dokumentierte **Community Edition** ist der kostenlose, selbst gehostete,
+Single-Tenant-Gedächtniskern. Ein kommerzieller Weg (Mandantenfähigkeit, die
+Context-Documents-Erweiterung, ein Moderations-Add-on und gehostetes SaaS) ist
+geplant, aber pre-beta — siehe [Editionen](/concepts/editions/). Er wird
+ehrlich beschrieben: keine Übertreibungen, keine Preise, keine Daten.

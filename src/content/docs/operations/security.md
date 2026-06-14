@@ -1,97 +1,112 @@
 ---
-title: Security & privacy
-description: The private-memory guarantee and how it is structurally enforced, disable vs. erasure, the release-blocking invariants, and the AGPL §13 network-source obligation.
+title: Sicherheit & Datenschutz
+description: Die Garantie des privaten Gedächtnisses und wie sie strukturell durchgesetzt wird, Deaktivierung vs. Löschung, die release-blockierenden Invarianten und die Netzwerk-Quelltextpflicht nach AGPL §13.
 ---
 
-This page describes the security model of the Community Edition: the
-private-memory guarantee and how it is *structurally* enforced, what disabling
-versus erasing a member means for their memory, and the invariants kumbuka treats
-as release-blocking.
+Diese Seite beschreibt das Sicherheitsmodell der Community Edition: die Garantie
+des privaten Gedächtnisses und wie sie *strukturell* durchgesetzt wird, was das
+Deaktivieren gegenüber dem Löschen eines Mitglieds für dessen Gedächtnis
+bedeutet, und die Invarianten, die kumbuka als release-blockierend behandelt.
 
-To **report a vulnerability**, see [SECURITY.md](https://github.com/kumbuka-ai/kumbuka/blob/main/SECURITY.md). Please do not
-open a public issue for security problems.
+Um eine **Schwachstelle zu melden**, siehe [SECURITY.md](https://github.com/kumbuka-ai/kumbuka/blob/main/SECURITY.md). Bitte
+eröffnen Sie für Sicherheitsprobleme kein öffentliches Issue.
 
-## The private-memory guarantee
+## Die Garantie des privaten Gedächtnisses
 
-A member's **private** scope is owned by them and reachable **only** by them,
-**only** through the MCP surface under their own authenticated session.
+Der **private** Scope eines Mitglieds gehört diesem und ist **nur** für dieses
+erreichbar, **nur** über die MCP-Oberfläche unter dessen eigener
+authentifizierter Sitzung.
 
-- **No** admin, **no** console screen, and **no** team-facing API can read it.
-- It is enforced at the **data-access layer** — the privileged (admin/console)
-  code paths have **no route** that can return private rows.
-- It is **not** a configuration toggle that could be flipped, and not a UI-level
-  filter that a missing check could bypass.
+- **Kein** Admin, **keine** Konsolenansicht und **keine** teamseitige API kann ihn
+  lesen.
+- Er wird auf der **Datenzugriffsschicht** durchgesetzt — die privilegierten
+  (Admin-/Konsolen-)Codepfade haben **keine Route**, die private Zeilen
+  zurückgeben kann.
+- Es handelt sich **nicht** um einen Konfigurationsschalter, der umgelegt werden
+  könnte, und nicht um einen Filter auf UI-Ebene, den eine fehlende Prüfung
+  umgehen könnte.
 
-### How it is structurally enforced
+### Wie sie strukturell durchgesetzt wird
 
-The guarantee does not depend on every caller remembering to add a `WHERE`
-clause. The admin/console read paths are served by code that has no method
-capable of returning a private row at all — the privileged surface simply cannot
-express the query. The private scope is reachable only through the per-user MCP
-path, which always runs as the owning, authenticated user.
+Die Garantie hängt nicht davon ab, dass jeder Aufrufer daran denkt, eine
+`WHERE`-Klausel hinzuzufügen. Die Admin-/Konsolen-Lesepfade werden von Code
+bedient, der überhaupt keine Methode besitzt, die eine private Zeile zurückgeben
+könnte — die privilegierte Oberfläche kann die Abfrage schlicht nicht
+ausdrücken. Der private Scope ist nur über den nutzerspezifischen MCP-Pfad
+erreichbar, der stets als der besitzende, authentifizierte Nutzer ausgeführt
+wird.
 
-The console surfaces this promise in several places (the scope browser, the
-dashboard, settings, the account screen, and the invite flow) so it reads as a
-deliberate guarantee rather than an omission.
+Die Konsole macht dieses Versprechen an mehreren Stellen sichtbar (der
+Scope-Browser, das Dashboard, die Einstellungen, die Kontoansicht und der
+Einladungsablauf), sodass es als bewusste Garantie und nicht als Auslassung
+gelesen wird.
 
-> Design rule: when the private guarantee and convenience conflict, the guarantee
-> wins.
+> Entwurfsregel: Wenn die private Garantie und die Bequemlichkeit in Konflikt
+> geraten, gewinnt die Garantie.
 
-## Disable vs. erasure
+## Deaktivierung vs. Löschung
 
-These are two different operations with two different effects on a member's
-memory.
+Dies sind zwei verschiedene Vorgänge mit zwei verschiedenen Auswirkungen auf das
+Gedächtnis eines Mitglieds.
 
-- **Disable** *(ratified behavior)* — disabling a user **suspends their
-  account**: they can no longer sign in or reach the MCP surface. Their
-  **private memory is left untouched and remains theirs**. Re-enabling restores
-  access to it. Disable is reversible and destroys nothing.
+- **Deaktivierung** *(ratifiziertes Verhalten)* — das Deaktivieren eines Nutzers
+  **setzt dessen Konto aus**: Er kann sich nicht mehr anmelden oder die
+  MCP-Oberfläche erreichen. Sein **privates Gedächtnis bleibt unangetastet und
+  bleibt sein Eigentum**. Eine erneute Aktivierung stellt den Zugriff darauf
+  wieder her. Die Deaktivierung ist umkehrbar und zerstört nichts.
 
-- **Erasure** *(ratified behavior)* — the deliberate opposite of disable: the
-  member's account **and their entire private scope** are removed, so the private
-  content is **gone, not merely suspended**. This is the behavior for an
-  account-deletion / right-to-erasure request.
+- **Löschung** *(ratifiziertes Verhalten)* — das bewusste Gegenteil der
+  Deaktivierung: das Konto des Mitglieds **und dessen gesamter privater Scope**
+  werden entfernt, sodass der private Inhalt **weg ist, nicht bloß ausgesetzt**.
+  Dies ist das Verhalten für eine Kontolöschung / Anfrage auf Recht auf Löschung.
 
-How erasure treats what the member touched:
+Wie die Löschung mit dem umgeht, was das Mitglied berührt hat:
 
-- **Private memory** — deleted in full. Nothing of the member's private scope
-  survives erasure.
-- **Shared entries they authored** (in `global` / `project` scopes) — **retained**,
-  so team knowledge the group relies on is not lost when a person leaves. Their
-  **authorship is anonymized** to a tombstone identity (e.g. *former member*).
-  This is a server-side deletion event, consistent with the
-  [server-derived-authorship invariant](#release-blocking-invariants) — authorship
-  is reassigned by the server, never by a client flag.
-- **Grace window** — erasure is **reversible for a short, configurable retention
-  period (default 30 days)**; after it elapses, deletion is permanent.
+- **Privates Gedächtnis** — vollständig gelöscht. Nichts vom privaten Scope des
+  Mitglieds überlebt die Löschung.
+- **Geteilte Einträge, die es verfasst hat** (in `global` / `project` Scopes) —
+  **beibehalten**, sodass Teamwissen, auf das sich die Gruppe verlässt, nicht
+  verloren geht, wenn eine Person geht. Die **Autorschaft wird anonymisiert** zu
+  einer Tombstone-Identität (z. B. *ehemaliges Mitglied*). Dies ist ein
+  serverseitiges Löschereignis, konsistent mit der
+  [Invariante der serverseitig abgeleiteten Autorschaft](#release-blocking-invariants) —
+  die Autorschaft wird vom Server neu zugewiesen, niemals durch ein Client-Flag.
+- **Kulanzfenster** — die Löschung ist **für einen kurzen, konfigurierbaren
+  Aufbewahrungszeitraum umkehrbar (Standard 30 Tage)**; nach dessen Ablauf ist
+  die Löschung dauerhaft.
 
-## Release-blocking invariants
+## Release-blockierende Invarianten {#release-blocking-invariants}
 
-kumbuka treats the following as gating — a build that violates any of them is not
-shippable:
+kumbuka behandelt die folgenden Punkte als sperrend — ein Build, der einen von
+ihnen verletzt, ist nicht auslieferbar:
 
-1. **Private never leaks.** No admin, console, or team-facing API path can return
-   a member's private rows.
-2. **Tenant isolation.** No deployment boundary lets one tenant's data reach
-   another. *(In the single-tenant Community Edition there is one tenant; the
-   isolation seam exists for forward compatibility and is load-bearing in the
-   commercial multi-tenant path.)*
-3. **Operator sees no private content.** Running or administering the service
-   does not grant a path to members' private memory.
-4. **Server-derived authorship.** An entry's author is determined by the write
-   channel on the server, never by a client-supplied flag.
+1. **Privates leckt niemals.** Kein Admin-, Konsolen- oder teamseitiger API-Pfad
+   kann die privaten Zeilen eines Mitglieds zurückgeben.
+2. **Mandantentrennung.** Keine Bereitstellungsgrenze lässt die Daten eines
+   Mandanten an einen anderen gelangen. *(In der einmandantenfähigen Community
+   Edition gibt es einen Mandanten; die Isolationsnaht existiert zur
+   Vorwärtskompatibilität und ist im kommerziellen mehrmandantenfähigen Pfad
+   tragend.)*
+3. **Der Betreiber sieht keinen privaten Inhalt.** Das Ausführen oder
+   Administrieren des Dienstes gewährt keinen Pfad zum privaten Gedächtnis der
+   Mitglieder.
+4. **Serverseitig abgeleitete Autorschaft.** Der Autor eines Eintrags wird durch
+   den Schreibkanal auf dem Server bestimmt, niemals durch ein
+   client-geliefertes Flag.
 
-## Network source obligation (AGPL §13)
+## Netzwerk-Quelltextpflicht (AGPL §13) {#network-source-obligation-agpl-13}
 
-kumbuka is licensed under **AGPL-3.0** and is normally deployed as a
-network-accessible service. Under AGPL **§13**, if you run a **modified** version
-and let users interact with it over a network, you must offer those users the
-**corresponding source** of your modified version. Operating an unmodified
-release does not create new obligations beyond the AGPL's terms; modifying it and
-exposing it over a network does. See [Editions](/concepts/editions/) and the
-[LICENSE](https://github.com/kumbuka-ai/kumbuka/blob/main/LICENSE).
+kumbuka ist unter **AGPL-3.0** lizenziert und wird normalerweise als
+netzwerkzugänglicher Dienst bereitgestellt. Nach AGPL **§13** müssen Sie, wenn
+Sie eine **modifizierte** Version betreiben und Nutzer über ein Netzwerk mit ihr
+interagieren lassen, diesen Nutzern den **entsprechenden Quelltext** Ihrer
+modifizierten Version anbieten. Der Betrieb eines unveränderten Release begründet
+keine neuen Pflichten über die Bedingungen der AGPL hinaus; das Modifizieren und
+das Bereitstellen über ein Netzwerk dagegen schon. Siehe [Editionen](/concepts/editions/)
+und die [LICENSE](https://github.com/kumbuka-ai/kumbuka/blob/main/LICENSE).
 
-## Reporting
+## Meldung
 
-Security reports go to the contact in [SECURITY.md](https://github.com/kumbuka-ai/kumbuka/blob/main/SECURITY.md). We ask for
-coordinated disclosure and will work with you on a fix and timeline.
+Sicherheitsmeldungen gehen an den Kontakt in [SECURITY.md](https://github.com/kumbuka-ai/kumbuka/blob/main/SECURITY.md).
+Wir bitten um koordinierte Offenlegung und arbeiten mit Ihnen an einer Behebung
+und einem Zeitplan.

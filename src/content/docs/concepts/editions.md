@@ -1,61 +1,65 @@
 ---
-title: Editions
-description: The open-core boundary — what the free, self-hosted Community Edition is today, and what the planned commercial path adds, stated honestly.
+title: Editionen
+description: Die Open-Core-Grenze — was die kostenlose, selbst gehostete Community Edition heute ist und was der geplante kommerzielle Weg ergänzt, ehrlich dargestellt.
 ---
 
-kumbuka follows an **open-core** model: a complete, free, open-source core, with
-a planned commercial path for organizations that need more. This page states the
-boundary honestly — what the Community Edition is today, and what the commercial
-path adds — without overclaiming.
+kumbuka folgt einem **Open-Core**-Modell: ein vollständiger, kostenloser,
+quelloffener Kern mit einem geplanten kommerziellen Weg für Organisationen, die
+mehr benötigen. Diese Seite stellt die Grenze ehrlich dar — was die Community
+Edition heute ist und was der kommerzielle Weg ergänzt — ohne zu übertreiben.
 
-> **The product is pre-beta.** The commercial path below describes intended
-> direction. It is **not generally available**, and this page lists **no prices
-> and no dates**.
+> **Das Produkt ist pre-beta.** Der kommerzielle Weg unten beschreibt die
+> beabsichtigte Richtung. Er ist **nicht allgemein verfügbar**, und diese Seite
+> nennt **keine Preise und keine Termine**.
 
-## Community Edition (this repository's subject)
+## Community Edition (Gegenstand dieses Repositorys)
 
-The Community Edition is the **OSS, self-hosted, single-tenant, atomic memory
-core** — and it is free.
+Die Community Edition ist der **quelloffene, selbst gehostete, Single-Tenant,
+atomare Gedächtniskern** — und sie ist kostenlos.
 
-- **Self-hosted** — you run the Docker Compose stack on your own infrastructure
-  ([Quickstart](/get-started/quickstart/)).
-- **Single-tenant** — one team per deployment.
-- **The atomic memory core** — the full memory model: the six-type entry
-  taxonomy, `global` / `project` / `private` scopes, the five `memory_*` MCP
-  tools, the admin console, and the **private-memory guarantee** enforced at the
-  data-access layer.
-- **Licensed AGPL-3.0** — see [Licensing](#licensing).
+- **Selbst gehostet** — Sie betreiben den Docker-Compose-Stack auf Ihrer eigenen
+  Infrastruktur ([Schnellstart](/get-started/quickstart/)).
+- **Single-Tenant** — ein Team pro Deployment.
+- **Der atomare Gedächtniskern** — das vollständige Gedächtnismodell: die
+  Sechs-Typen-Taxonomie der Einträge, die Bereiche `global` / `project` /
+  `private`, die fünf `memory_*` MCP-Tools, die Admin-Konsole und die **Garantie
+  des privaten Gedächtnisses**, die auf der Datenzugriffsebene durchgesetzt wird.
+- **Lizenziert unter AGPL-3.0** — siehe [Lizenzierung](#licensing).
 
-The private guarantee is **not** an edition-gated feature. It is part of the core
-and is present in the Community Edition exactly as described in
-[Security & privacy](/operations/security/).
+Die Garantie des privaten Gedächtnisses ist **kein** an die Edition gebundenes
+Feature. Sie ist Teil des Kerns und in der Community Edition genau so vorhanden,
+wie es unter [Sicherheit & Datenschutz](/operations/security/) beschrieben ist.
 
-## Commercial path (planned)
+## Kommerzieller Weg (geplant)
 
-For organizations that need capabilities beyond a single self-hosted team, a
-commercial path is planned. Stated plainly, without availability claims:
+Für Organisationen, die Fähigkeiten über ein einzelnes, selbst gehostetes Team
+hinaus benötigen, ist ein kommerzieller Weg geplant. Schlicht dargestellt, ohne
+Verfügbarkeitsaussagen:
 
 | Capability | What it is |
 |---|---|
-| **Multi-tenancy** | Many isolated teams on one deployment. The single-tenant core already carries the isolation seam for forward compatibility. |
-| **Context Documents** | An extension beyond the atomic memory entries — richer, document-shaped context. |
-| **Moderation** | An add-on for reviewing and governing shared memory at scale. |
-| **Hosted SaaS** | A managed offering, so you don't self-host. |
+| **Mehrmandantenfähigkeit (Multi-Tenancy)** | Viele isolierte Teams auf einem Deployment. Der Single-Tenant-Kern trägt bereits die Isolationsnaht für die Vorwärtskompatibilität. |
+| **Context Documents** | Eine Erweiterung über die atomaren Gedächtniseinträge hinaus — reichhaltigerer, dokumentförmiger Kontext. |
+| **Moderation** | Ein Add-on zum Überprüfen und Steuern des geteilten Gedächtnisses im großen Maßstab. |
+| **Gehostetes SaaS** | Ein verwaltetes Angebot, sodass Sie nicht selbst hosten müssen. |
 
-These are the commercial additions; the Community Edition does not include them.
-We will not imply they are shipped or hardened while the product is pre-beta.
+Dies sind die kommerziellen Ergänzungen; die Community Edition enthält sie nicht.
+Wir werden nicht andeuten, dass sie ausgeliefert oder ausgehärtet sind, solange
+das Produkt pre-beta ist.
 
-## Licensing
+## Lizenzierung {#licensing}
 
-The Community Edition is licensed under the **GNU Affero General Public License
-v3.0** ([AGPL-3.0](https://github.com/kumbuka-ai/kumbuka/blob/main/LICENSE), ratified). Because kumbuka is deployed as a
-network service, AGPL **§13** applies — running a modified version that users
-interact with over a network obliges you to offer them its corresponding source
-(see [Security & privacy](/operations/security/#network-source-obligation-agpl-13)).
+Die Community Edition ist unter der **GNU Affero General Public License v3.0**
+([AGPL-3.0](https://github.com/kumbuka-ai/kumbuka/blob/main/LICENSE), ratifiziert)
+lizenziert. Da kumbuka als Netzwerkdienst bereitgestellt wird, gilt AGPL
+**§13** — der Betrieb einer modifizierten Version, mit der Nutzer über ein
+Netzwerk interagieren, verpflichtet Sie, ihnen den zugehörigen Quellcode
+anzubieten (siehe [Sicherheit & Datenschutz](/operations/security/#network-source-obligation-agpl-13)).
 
-A commercial **dual-license** path is planned for organizations that cannot
-operate under the AGPL or that want the commercial-edition features. Details,
-terms, and availability are not yet published. `[founder input]`
+Ein kommerzieller **Dual-License**-Weg ist für Organisationen geplant, die nicht
+unter der AGPL operieren können oder die die Features der kommerziellen Edition
+wünschen. Details, Bedingungen und Verfügbarkeit sind noch nicht veröffentlicht.
+`[founder input]`
 
-For how this licensing interacts with contributions, see
+Wie diese Lizenzierung mit Beiträgen zusammenwirkt, erfahren Sie in
 [CONTRIBUTING.md](https://github.com/kumbuka-ai/kumbuka/blob/main/CONTRIBUTING.md).

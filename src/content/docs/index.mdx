@@ -1,18 +1,18 @@
 ---
 title: kumbuka
-description: Shared, persistent memory for AI assistants working with a team — served over MCP, curated through an admin console, with a private space that stays private.
+description: Geteiltes, dauerhaftes Gedächtnis für KI-Assistenten in der Teamarbeit — bereitgestellt über MCP, kuratiert über eine Admin-Konsole, mit einem privaten Bereich, der privat bleibt.
 template: splash
 hero:
-  tagline: Shared, persistent memory for AI assistants working with a team — served over MCP, curated through an admin console, with a private space that stays private.
+  tagline: Geteiltes, dauerhaftes Gedächtnis für KI-Assistenten in der Teamarbeit — bereitgestellt über MCP, kuratiert über eine Admin-Konsole, mit einem privaten Bereich, der privat bleibt.
   image:
     alt: kumbuka
     file: ../../assets/kumbuka-mark-orange.svg
   actions:
-    - text: Get started
+    - text: Loslegen
       link: /get-started/overview/
       icon: right-arrow
       variant: primary
-    - text: View on GitHub
+    - text: Auf GitHub ansehen
       link: https://github.com/kumbuka-ai/kumbuka
       icon: external
       variant: minimal
@@ -21,45 +21,51 @@ hero:
 import { Card, CardGrid } from '@astrojs/starlight/components';
 
 :::caution[Status: pre-beta]
-kumbuka is in active development. The architecture and data model are settled and
-the private-memory guarantee is a hard design constraint, but the project is not
-yet a hardened, shipped product. Expect rough edges and breaking changes.
+kumbuka befindet sich in aktiver Entwicklung. Architektur und Datenmodell stehen,
+und die Garantie des privaten Gedächtnisses ist eine harte Design-Vorgabe — aber
+das Projekt ist noch kein gehärtetes, fertiges Produkt. Rechne mit rauen Kanten
+und Breaking Changes.
 :::
 
-*kumbuka* is Swahili — the imperative **"remember!"**.
+*kumbuka* ist Swahili — der Imperativ **„erinnere dich!"**.
 
-## The context tax
+## Die Kontext-Steuer
 
-AI assistants are stateless between sessions. A team using them pays the same
-toll over and over — re-explaining the things that should simply be known: which
-database is the system of record, that money is integer minor units, that service
-names are kebab-case. kumbuka turns that steering knowledge into a first-class,
-team-owned asset, so it is applied without being re-told.
+KI-Assistenten sind zwischen Sitzungen zustandslos. Ein Team zahlt immer wieder
+denselben Tribut — es erklärt erneut, was einfach bekannt sein sollte: welche
+Datenbank das System of Record ist, dass Geldbeträge ganzzahlige Minor Units
+sind, dass Servicenamen kebab-case sind. kumbuka macht aus diesem steuernden
+Wissen ein erstklassiges, teameigenes Gut, sodass es angewendet wird, ohne erneut
+erzählt zu werden.
 
 <CardGrid stagger>
-  <Card title="Team memory, served over MCP" icon="open-book">
-    A durable, shared place for the decisions, conventions, and constraints an
-    assistant should carry across conversations — read and written through one
-    MCP endpoint by any MCP-capable client.
+  <Card title="Team-Gedächtnis, über MCP bereitgestellt" icon="open-book">
+    Ein dauerhafter, geteilter Ort für die Entscheidungen, Konventionen und
+    Einschränkungen, die ein Assistent über Konversationen hinweg mitführen
+    sollte — von jedem MCP-fähigen Client über einen Endpunkt gelesen und
+    geschrieben.
   </Card>
-  <Card title="Private stays private" icon="approve-check">
-    Each member has a private space reachable only by them, only through their
-    own authenticated session. No admin, console, or team API can read it —
-    enforced structurally, not by a setting.
+  <Card title="Privates bleibt privat" icon="approve-check">
+    Jedes Mitglied hat einen privaten Bereich, der nur von ihm und nur über die
+    eigene authentifizierte Sitzung erreichbar ist. Kein Administrator, keine
+    Konsole und keine Team-API kann ihn lesen — strukturell durchgesetzt, nicht
+    durch eine Einstellung.
   </Card>
-  <Card title="Curated, not accumulated" icon="setting">
-    A web admin console lets the team see and edit what the assistant relies on,
-    instead of each person growing an opaque, divergent context.
+  <Card title="Kuratiert, nicht angehäuft" icon="setting">
+    Eine Web-Admin-Konsole lässt das Team sehen und bearbeiten, worauf sich der
+    Assistent stützt — statt dass jede Person einen undurchsichtigen,
+    divergierenden Kontext anwachsen lässt.
   </Card>
-  <Card title="Open-core, self-hosted" icon="rocket">
-    The Community Edition is the free, AGPL-licensed, single-tenant memory core.
-    Run it as one Docker Compose stack on your own infrastructure.
+  <Card title="Open-Core, selbst gehostet" icon="rocket">
+    Die Community Edition ist der kostenlose, AGPL-lizenzierte,
+    Single-Tenant-Gedächtniskern. Betreibe ihn als einen Docker-Compose-Stack auf
+    deiner eigenen Infrastruktur.
   </Card>
 </CardGrid>
 
-## Where to next
+## Wohin als Nächstes
 
-- **[Overview](/get-started/overview/)** — what kumbuka is and the personal / shared boundary.
-- **[Quickstart](/get-started/quickstart/)** — self-host the Community Edition.
-- **[Concepts](/concepts/data-model/)** — the memory entry, scopes, and authorship.
-- **[MCP tools](/reference/mcp-tools/)** — the five tools an assistant calls.
+- **[Überblick](/get-started/overview/)** — was kumbuka ist und die persönliche / geteilte Grenze.
+- **[Schnellstart](/get-started/quickstart/)** — die Community Edition selbst hosten.
+- **[Konzepte](/concepts/data-model/)** — der Gedächtniseintrag, Scopes und Autorschaft.
+- **[MCP-Tools](/reference/mcp-tools/)** — die fünf Tools, die ein Assistent aufruft.

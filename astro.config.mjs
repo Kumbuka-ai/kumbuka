@@ -3,6 +3,7 @@ import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import starlightLinksValidator from 'starlight-links-validator';
 import remarkHeadingId from 'remark-heading-id';
+import mermaid from 'astro-mermaid';
 
 // https://astro.build/config
 export default defineConfig({
@@ -13,11 +14,14 @@ export default defineConfig({
     remarkPlugins: [[remarkHeadingId, { defaults: false }]],
   },
   integrations: [
+    // Render ```mermaid fences as diagrams (client-side, theme-aware). Must run
+    // before Starlight so the blocks are transformed ahead of code highlighting.
+    mermaid({ theme: 'neutral', autoTheme: true }),
     starlight({
       plugins: [starlightLinksValidator()],
       title: 'kumbuka',
       description:
-        'Shared, persistent memory for AI assistants working with a team — served over MCP, curated through an admin console, with a private space that stays private.',
+        'Geteiltes, dauerhaftes Gedächtnis für KI-Assistenten in der Teamarbeit — bereitgestellt über MCP, kuratiert über eine Admin-Konsole, mit einem privaten Bereich, der privat bleibt.',
       logo: {
         src: './src/assets/kumbuka-mark-orange.svg',
         alt: 'kumbuka',
@@ -31,17 +35,17 @@ export default defineConfig({
           href: 'https://github.com/kumbuka-ai/kumbuka',
         },
       ],
-      // English is the root locale (served at /), German under /de/.
+      // German is the root locale (served at /), English under /en/.
       defaultLocale: 'root',
       locales: {
-        root: { label: 'English', lang: 'en' },
-        de: { label: 'Deutsch', lang: 'de' },
+        root: { label: 'Deutsch', lang: 'de' },
+        en: { label: 'English', lang: 'en' },
       },
-      // Untranslated pages fall back to the English version automatically.
+      // Untranslated pages fall back to the German (root) version automatically.
       sidebar: [
         {
-          label: 'Get started',
-          translations: { de: 'Einstieg' },
+          label: 'Einstieg',
+          translations: { en: 'Get started' },
           items: [
             { slug: 'get-started/overview' },
             { slug: 'get-started/quickstart' },
@@ -49,24 +53,24 @@ export default defineConfig({
           ],
         },
         {
-          label: 'Concepts',
-          translations: { de: 'Konzepte' },
+          label: 'Konzepte',
+          translations: { en: 'Concepts' },
           items: [
             { slug: 'concepts/data-model' },
             { slug: 'concepts/editions' },
           ],
         },
         {
-          label: 'Reference',
-          translations: { de: 'Referenz' },
+          label: 'Referenz',
+          translations: { en: 'Reference' },
           items: [
             { slug: 'reference/mcp-tools' },
             { slug: 'reference/configuration' },
           ],
         },
         {
-          label: 'Operations',
-          translations: { de: 'Betrieb' },
+          label: 'Betrieb',
+          translations: { en: 'Operations' },
           items: [
             { slug: 'operations/architecture' },
             { slug: 'operations/security' },
