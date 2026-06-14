@@ -1,0 +1,38 @@
+/* kumbuka brand palette — orange #FF5B1F on navy #141820 / #2D4059. */
+:root {
+  /* Starlight accent + grays, tuned to the kumbuka mark. */
+  --sl-color-accent-low: #3a1605;
+  --sl-color-accent: #ff5b1f;
+  --sl-color-accent-high: #ffc8ab;
+
+  --sl-color-white: #ffffff;
+  --sl-color-gray-1: #eceef2;
+  --sl-color-gray-2: #c0c2c7;
+  --sl-color-gray-3: #888b96;
+  --sl-color-gray-4: #545861;
+  --sl-color-gray-5: #353841;
+  --sl-color-gray-6: #24272f;
+  --sl-color-black: #141820;
+}
+
+/* Light theme: keep the orange accent legible on white. */
+:root[data-theme='light'] {
+  --sl-color-accent-low: #ffe0d1;
+  --sl-color-accent: #d84200;
+  --sl-color-accent-high: #5a2200;
+
+  --sl-color-white: #141820;
+  --sl-color-gray-1: #24272f;
+  --sl-color-gray-2: #353841;
+  --sl-color-gray-3: #545861;
+  --sl-color-gray-4: #888b96;
+  --sl-color-gray-5: #c0c2c7;
+  --sl-color-gray-6: #eceef2;
+  --sl-color-gray-7: #f5f6f8;
+  --sl-color-black: #ffffff;
+}
+
+/* The hero tagline reads better a touch tighter. */
+.hero > .stack {
+  --sl-text-h1: clamp(2.2rem, 1.2rem + 3.5vw, 3.5rem);
+}

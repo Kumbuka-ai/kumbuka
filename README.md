@@ -73,7 +73,7 @@ that can return private rows — **not** by a configuration toggle that could be
 flipped. Disabling a member suspends their account but leaves their private
 memory untouched and theirs.
 
-See [docs/security.md](docs/security.md) for how this is structurally enforced.
+See [the Security & privacy guide](https://docs.kumbuka.ai/operations/security/) for how this is structurally enforced.
 
 ## Quickstart (self-host the Community Edition)
 
@@ -91,7 +91,7 @@ docker compose --profile app up -d    # backend + postgres + keycloak + caddy
 
 The admin console is a separate service, added to the same stack via a small
 `compose.override.yml` — see the step-by-step
-**[docs/quickstart.md](docs/quickstart.md)**, which also covers prerequisites,
+**[Quickstart guide](https://docs.kumbuka.ai/get-started/quickstart/)**, which also covers prerequisites,
 first run, and the [`kumbuka-server` runbook](https://github.com/kumbuka-ai/kumbuka-server#quick-start-dev)
 for production deployment.
 
@@ -103,7 +103,7 @@ URL, a client id, and a client secret. In claude.ai you add it under
 assistant can then call the memory tools on your behalf, including your own
 private scope.
 
-See **[docs/connecting-an-assistant.md](docs/connecting-an-assistant.md)** for
+See **[Connecting an assistant guide](https://docs.kumbuka.ai/get-started/connecting-an-assistant/)** for
 the walkthrough, and the
 [`kumbuka-server` guide](https://github.com/kumbuka-ai/kumbuka-server#connecting-claude-clients)
 for Claude Desktop, Claude Code, and Claude Mobile.
@@ -122,7 +122,7 @@ beats brand noise.
 | `memory_scopes` | List the scopes the caller may see (their private scope plus shared ones). |
 | `memory_load_context` | A typed, ready-to-inject digest of the relevant rules, grouped by type. |
 
-Full reference: **[docs/mcp-tools.md](docs/mcp-tools.md)**.
+Full reference: **[MCP tools reference](https://docs.kumbuka.ai/reference/mcp-tools/)**.
 
 ## Architecture
 
@@ -160,7 +160,7 @@ flowchart TD
 
 The backend plays **two OIDC roles**: a bearer **resource server** for `/mcp`,
 and a confidential **web-app client** (BFF) for the console. Details and the
-data flow are in **[docs/architecture.md](docs/architecture.md)**.
+data flow are in **[Architecture guide](https://docs.kumbuka.ai/operations/architecture/)**.
 
 ## Repo map
 
@@ -172,17 +172,19 @@ data flow are in **[docs/architecture.md](docs/architecture.md)**.
 
 ## Documentation
 
+The full documentation site lives at **[docs.kumbuka.ai](https://docs.kumbuka.ai)** (English and German).
+
 | Guide | For |
 |---|---|
-| [overview.md](docs/overview.md) | What kumbuka is and the personal/shared boundary. |
-| [concepts.md](docs/concepts.md) | The domain model: scopes, the entry taxonomy, authorship, keys. |
-| [quickstart.md](docs/quickstart.md) | Self-hosting the Community Edition, step by step. |
-| [connecting-an-assistant.md](docs/connecting-an-assistant.md) | Adding the connector in claude.ai. |
-| [mcp-tools.md](docs/mcp-tools.md) | Reference for the five `memory_*` tools. |
-| [architecture.md](docs/architecture.md) | Topology, the two OIDC roles, components, data flow. |
-| [security.md](docs/security.md) | The private guarantee, structurally enforced; disable vs. erasure. |
-| [configuration.md](docs/configuration.md) | Env/config knobs and policies. |
-| [editions.md](docs/editions.md) | Community Edition vs. the commercial path. |
+| [Overview](https://docs.kumbuka.ai/get-started/overview/) | What kumbuka is and the personal/shared boundary. |
+| [Concepts](https://docs.kumbuka.ai/concepts/data-model/) | The domain model: scopes, the entry taxonomy, authorship, keys. |
+| [Quickstart](https://docs.kumbuka.ai/get-started/quickstart/) | Self-hosting the Community Edition, step by step. |
+| [Connecting an assistant](https://docs.kumbuka.ai/get-started/connecting-an-assistant/) | Adding the connector in claude.ai. |
+| [MCP tools](https://docs.kumbuka.ai/reference/mcp-tools/) | Reference for the five `memory_*` tools. |
+| [Architecture](https://docs.kumbuka.ai/operations/architecture/) | Topology, the two OIDC roles, components, data flow. |
+| [Security & privacy](https://docs.kumbuka.ai/operations/security/) | The private guarantee, structurally enforced; disable vs. erasure. |
+| [Configuration](https://docs.kumbuka.ai/reference/configuration/) | Env/config knobs and policies. |
+| [Editions](https://docs.kumbuka.ai/concepts/editions/) | Community Edition vs. the commercial path. |
 
 ## License
 
@@ -194,7 +196,7 @@ corresponding source of your modified version.
 
 A commercial **dual-license** path is planned for organizations that cannot
 operate under the AGPL or that want the commercial-edition features (see
-[docs/editions.md](docs/editions.md)). It is not yet generally available — no
+[Editions](https://docs.kumbuka.ai/concepts/editions/)). It is not yet generally available — no
 prices or dates yet.
 
 ## Contributing

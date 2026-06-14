@@ -1,4 +1,7 @@
-# Configuration
+---
+title: Configuration
+description: The team policies set in the console and the deployment knobs set in the environment for the Community Edition.
+---
 
 This page describes the configurable behavior of the Community Edition — the
 team policies set in the console and the deployment knobs set in the environment.
@@ -75,5 +78,5 @@ Set in the environment before `docker compose up`. Typical categories (see the
 - **Identity** — Keycloak realm and client configuration (realm `kumbuka`;
   clients `kumbuka-backend`, `kumbuka-admin`, `kumbuka-connector`).
 
-See [quickstart.md](quickstart.md) to put these together for a first run, and
-[security.md](security.md) for the invariants a configuration must not break.
+See [Quickstart](/en/get-started/quickstart/) to put these together for a first run, and
+[Security & privacy](/en/operations/security/) for the invariants a configuration must not break.

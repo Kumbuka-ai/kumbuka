@@ -7,53 +7,58 @@ on:
     branches: [main]
   workflow_dispatch:
 
-# ---- Cancel superseded runs on a branch/PR, but never cancel a push to main ----
+# Cancel superseded runs on a branch/PR, but never cancel a push to main.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
-# Read-only: this workflow only validates content, it never writes to the repo.
 permissions:
   contents: read
 
 jobs:
-  # ---- Internal links are a HARD gate (we own them); external links are reported but soft ----
+  # Required check (branch protection). Internal links are now hard-gated by the
+  # `Build docs site` job (starlight-links-validator). This job stays as the
+  # external-link rot reporter — report-only so transient 5xx/rate-limits don't
+  # turn the build red; results land in the job summary.
   links:
     name: Check Markdown links
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      # Offline pass: resolves relative links to local files and fails if a target is missing.
-      # No network -> deterministic. THIS is the gate: a renamed docs/*.md fails the build.
-      # Fragments (#anchors) are intentionally NOT checked here: slugification of headings
-      # like "AGPL §13" can differ from GitHub's and would false-positive a working link.
-      - name: Check internal links (hard fail)
-        uses: lycheeverse/lychee-action@v2
-        with:
-          args: >-
-            --offline
-            --no-progress
-            './**/*.md'
-          fail: true
-
-      # Online pass: hits the internet to catch external link rot, including #fragments.
-      # fail:false -> rate-limits / transient 5xx do NOT turn the build red; results land
-      # in the job summary so rot stays visible.
       - name: Check external links (report only)
         uses: lycheeverse/lychee-action@v2
         with:
           args: >-
-            --include-fragments
             --no-progress
+            --include-fragments
             --max-retries 3
             --retry-wait-time 5
             --accept 200,206,429
+            --exclude '^/'
             './**/*.md'
           fail: false
           jobSummary: true
 
-  # ---- Style lint kept intentionally lax: these are hand-authored prose docs ----
+  # The build IS the gate: starlight-links-validator fails the build on a broken
+  # internal link or missing heading anchor, and Astro fails on bad content.
+  build:
+    name: Build docs site
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.3
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: pnpm
+      - name: Install
+        run: pnpm install --frozen-lockfile
+      - name: Build (validates internal links + content)
+        run: pnpm run build
+
+  # Lax style lint on the hand-authored root prose files only.
   markdownlint:
     name: Lint Markdown style
     runs-on: ubuntu-latest
@@ -63,27 +68,4 @@ jobs:
         uses: DavidAnson/markdownlint-cli2-action@v20
         with:
           config: '.markdownlint.json'
-          globs: '**/*.md'
-
-  # ---- Mermaid validation is OFF by default (only 2 diagrams; GitHub renders them natively).
-  #      Flip `if:` to true to enable once diagram usage grows. ----
-  mermaid:
-    name: Validate Mermaid diagrams
-    runs-on: ubuntu-latest
-    if: false
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-      - name: Render every mermaid block (parse check)
-        run: |
-          npm install -g @mermaid-js/mermaid-cli
-          fail=0
-          for f in $(grep -rl '```mermaid' --include='*.md' .); do
-            awk '/```mermaid/{flag=1;next}/```/{flag=0}flag' "$f" > /tmp/diagram.mmd || true
-            if [ -s /tmp/diagram.mmd ]; then
-              mmdc -i /tmp/diagram.mmd -o /tmp/diagram.svg || fail=1
-            fi
-          done
-          exit $fail
+          globs: '*.md'

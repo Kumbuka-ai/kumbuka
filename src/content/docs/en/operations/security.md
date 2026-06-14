@@ -1,11 +1,14 @@
-# Security
+---
+title: Security & privacy
+description: The private-memory guarantee and how it is structurally enforced, disable vs. erasure, the release-blocking invariants, and the AGPL §13 network-source obligation.
+---
 
 This page describes the security model of the Community Edition: the
 private-memory guarantee and how it is *structurally* enforced, what disabling
 versus erasing a member means for their memory, and the invariants kumbuka treats
 as release-blocking.
 
-To **report a vulnerability**, see [SECURITY.md](../SECURITY.md). Please do not
+To **report a vulnerability**, see [SECURITY.md](https://github.com/kumbuka-ai/kumbuka/blob/main/SECURITY.md). Please do not
 open a public issue for security problems.
 
 ## The private-memory guarantee
@@ -78,17 +81,17 @@ shippable:
 4. **Server-derived authorship.** An entry's author is determined by the write
    channel on the server, never by a client-supplied flag.
 
-## Network-source obligation (AGPL §13)
+## Network source obligation (AGPL §13)
 
 kumbuka is licensed under **AGPL-3.0** and is normally deployed as a
 network-accessible service. Under AGPL **§13**, if you run a **modified** version
 and let users interact with it over a network, you must offer those users the
 **corresponding source** of your modified version. Operating an unmodified
 release does not create new obligations beyond the AGPL's terms; modifying it and
-exposing it over a network does. See [editions.md](editions.md) and the
-[LICENSE](../LICENSE).
+exposing it over a network does. See [Editions](/en/concepts/editions/) and the
+[LICENSE](https://github.com/kumbuka-ai/kumbuka/blob/main/LICENSE).
 
 ## Reporting
 
-Security reports go to the contact in [SECURITY.md](../SECURITY.md). We ask for
+Security reports go to the contact in [SECURITY.md](https://github.com/kumbuka-ai/kumbuka/blob/main/SECURITY.md). We ask for
 coordinated disclosure and will work with you on a fix and timeline.

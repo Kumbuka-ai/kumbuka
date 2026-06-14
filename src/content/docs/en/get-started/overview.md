@@ -1,4 +1,7 @@
-# Overview
+---
+title: Overview
+description: What kumbuka is, the personal/shared boundary that defines it, and where it runs.
+---
 
 kumbuka is an open-source **team memory system for AI assistants**. It gives a
 team a durable, shared place for the knowledge an assistant should carry across
@@ -6,8 +9,8 @@ conversations, and serves that knowledge to MCP-capable AI clients over a remote
 server. A web admin console lets the team curate it.
 
 This page orients you. For the precise domain model see
-[concepts.md](concepts.md); for how an assistant calls it see
-[mcp-tools.md](mcp-tools.md).
+[Concepts](/en/concepts/data-model/); for how an assistant calls it see the
+[MCP tools](/en/reference/mcp-tools/).
 
 ## What it is for
 
@@ -36,7 +39,7 @@ principle.
 - **Private memory** is each member's own working space. It is reachable **only**
   by that member, **only** through their own authenticated MCP session. No admin,
   no console screen, and no team-facing API can read it. This is enforced
-  structurally, not by a setting (see [security.md](security.md)).
+  structurally, not by a setting (see [Security & privacy](/en/operations/security/)).
 
 When the two ever appear to conflict, the private guarantee wins over
 convenience.
@@ -46,14 +49,14 @@ convenience.
 kumbuka is a single Docker Compose stack: a Quarkus backend, PostgreSQL,
 Keycloak (the identity provider), and a Caddy edge, with the Next.js admin
 console. The deployable stack lives in
-[`kumbuka-server`](https://github.com/kumbuka-ai/kumbuka-server). See
-[quickstart.md](quickstart.md) to self-host it and [architecture.md](architecture.md)
-for the topology.
+[`kumbuka-server`](https://github.com/kumbuka-ai/kumbuka-server). See the
+[Quickstart](/en/get-started/quickstart/) to self-host it and the
+[Architecture](/en/operations/architecture/) for the topology.
 
 ## Editions
 
 The **Community Edition** documented here is the free, self-hosted, single-tenant
 memory core. A commercial path (multi-tenancy, the Context Documents extension, a
 moderation add-on, and hosted SaaS) is planned but pre-beta — see
-[editions.md](editions.md). It is described honestly: no overclaiming, no prices,
-no dates.
+[Editions](/en/concepts/editions/). It is described honestly: no overclaiming, no
+prices, no dates.
