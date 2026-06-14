@@ -1,4 +1,7 @@
-# Architecture
+---
+title: Architecture
+description: The single Docker Compose stack — its components, topology, the backend's two OIDC roles, and how requests flow through it.
+---
 
 kumbuka is a single **Docker Compose** stack. One backend serves both the AI-
 facing MCP surface and the team-facing admin API; it is the only component that
@@ -70,7 +73,7 @@ The connector client (`kumbuka-connector`) is **confidential + PKCE**. PKCE is
 sent regardless of client type; the client secret provides a real
 connector-level kill-switch (rotate it to revoke access) and matches claude.ai's
 pre-registered id-plus-secret path. See
-[connecting-an-assistant.md](connecting-an-assistant.md).
+[Connecting an assistant](/get-started/connecting-an-assistant/).
 
 ## Data flow
 
@@ -90,7 +93,7 @@ pre-registered id-plus-secret path. See
 `private` is readable/writable only by its owner via the MCP surface; `global`
 and `project` are team-shared (members read, admins manage); authorship is
 server-derived from the write channel. The private rule is enforced at the
-**data-access layer**, not in the UI — see [security.md](security.md).
+**data-access layer**, not in the UI — see [Security & privacy](/operations/security/).
 
 ## Naming
 

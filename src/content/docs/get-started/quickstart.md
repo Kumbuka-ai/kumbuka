@@ -1,4 +1,7 @@
-# Quickstart — self-host the Community Edition
+---
+title: Quickstart
+description: Self-host the Community Edition as a single Docker Compose stack.
+---
 
 The Community Edition is the free, self-hosted, single-tenant memory core. It
 runs as a single Docker Compose stack: the Quarkus backend, PostgreSQL, Keycloak
@@ -20,7 +23,7 @@ production deployment.
   automatically when the hostnames resolve to your host.
 
 The hostnames are configuration, never hardcoded (see
-[configuration.md](configuration.md)). The defaults referenced below —
+[Configuration](/reference/configuration/)). The defaults referenced below —
 `kumbuka.ai`, `memory.kumbuka.ai`, `auth.kumbuka.ai` — are examples; set your
 own.
 
@@ -44,7 +47,7 @@ cp .env.example .env
 Edit `.env` and set at least your domain and the secrets. For local development
 you can accept the dev defaults; for anything internet-facing, set real
 hostnames and strong secrets. The full list of knobs is documented in
-[configuration.md](configuration.md) and in the
+[Configuration](/reference/configuration/) and in the
 [`kumbuka-server` README](https://github.com/kumbuka-ai/kumbuka-server#quick-start-dev).
 
 ## 3. Start the backend stack
@@ -116,12 +119,12 @@ against a live or mock backend without Docker, see the
 ## 6. Connect an assistant
 
 With the stack up and the connector details in hand, add kumbuka to your AI
-client — see [connecting-an-assistant.md](connecting-an-assistant.md).
+client — see [Connecting an assistant](/get-started/connecting-an-assistant/).
 
 ## Next steps
 
-- [configuration.md](configuration.md) — policies and environment knobs.
-- [architecture.md](architecture.md) — what each container does and how requests
+- [Configuration](/reference/configuration/) — policies and environment knobs.
+- [Architecture](/operations/architecture/) — what each container does and how requests
   flow.
-- [security.md](security.md) — the private guarantee and the operational
+- [Security & privacy](/operations/security/) — the private guarantee and the operational
   invariants to uphold.

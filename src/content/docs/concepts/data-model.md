@@ -1,4 +1,7 @@
-# Concepts
+---
+title: Concepts
+description: The kumbuka domain model — the memory entry, the scope it lives in, and the author that wrote it.
+---
 
 The kumbuka domain model is small on purpose. Three ideas carry it: the **memory
 entry**, the **scope** it lives in, and the **author** that wrote it.
@@ -48,7 +51,7 @@ use), a display name, a kind, a description, and an `archived` (read-only) flag.
 
 The single `global` scope is fixed. `project` scopes are created to organize
 shared memory; who may create them is a team policy (see
-[configuration.md](configuration.md)). `private` is always available to each
+[Configuration](/reference/configuration/)). `private` is always available to each
 member directly and is never the team's default write target.
 
 A scope's **slug** is immutable even across renames, so the address an assistant
@@ -73,5 +76,5 @@ simply means the entry arrived over MCP.
 The assistant interacts with these concepts through five MCP tools
 (`memory_remember`, `memory_recall`, `memory_forget`, `memory_scopes`,
 `memory_load_context`). Where a new entry lands when no scope is named is
-governed by the team's default write-scope policy. See [mcp-tools.md](mcp-tools.md)
-and [configuration.md](configuration.md).
+governed by the team's default write-scope policy. See [MCP tools](/reference/mcp-tools/)
+and [Configuration](/reference/configuration/).

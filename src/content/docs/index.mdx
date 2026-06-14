@@ -1,0 +1,65 @@
+---
+title: kumbuka
+description: Shared, persistent memory for AI assistants working with a team — served over MCP, curated through an admin console, with a private space that stays private.
+template: splash
+hero:
+  tagline: Shared, persistent memory for AI assistants working with a team — served over MCP, curated through an admin console, with a private space that stays private.
+  image:
+    alt: kumbuka
+    file: ../../assets/kumbuka-mark-orange.svg
+  actions:
+    - text: Get started
+      link: /get-started/overview/
+      icon: right-arrow
+      variant: primary
+    - text: View on GitHub
+      link: https://github.com/kumbuka-ai/kumbuka
+      icon: external
+      variant: minimal
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+:::caution[Status: pre-beta]
+kumbuka is in active development. The architecture and data model are settled and
+the private-memory guarantee is a hard design constraint, but the project is not
+yet a hardened, shipped product. Expect rough edges and breaking changes.
+:::
+
+*kumbuka* is Swahili — the imperative **"remember!"**.
+
+## The context tax
+
+AI assistants are stateless between sessions. A team using them pays the same
+toll over and over — re-explaining the things that should simply be known: which
+database is the system of record, that money is integer minor units, that service
+names are kebab-case. kumbuka turns that steering knowledge into a first-class,
+team-owned asset, so it is applied without being re-told.
+
+<CardGrid stagger>
+  <Card title="Team memory, served over MCP" icon="open-book">
+    A durable, shared place for the decisions, conventions, and constraints an
+    assistant should carry across conversations — read and written through one
+    MCP endpoint by any MCP-capable client.
+  </Card>
+  <Card title="Private stays private" icon="approve-check">
+    Each member has a private space reachable only by them, only through their
+    own authenticated session. No admin, console, or team API can read it —
+    enforced structurally, not by a setting.
+  </Card>
+  <Card title="Curated, not accumulated" icon="setting">
+    A web admin console lets the team see and edit what the assistant relies on,
+    instead of each person growing an opaque, divergent context.
+  </Card>
+  <Card title="Open-core, self-hosted" icon="rocket">
+    The Community Edition is the free, AGPL-licensed, single-tenant memory core.
+    Run it as one Docker Compose stack on your own infrastructure.
+  </Card>
+</CardGrid>
+
+## Where to next
+
+- **[Overview](/get-started/overview/)** — what kumbuka is and the personal / shared boundary.
+- **[Quickstart](/get-started/quickstart/)** — self-host the Community Edition.
+- **[Concepts](/concepts/data-model/)** — the memory entry, scopes, and authorship.
+- **[MCP tools](/reference/mcp-tools/)** — the five tools an assistant calls.

@@ -1,4 +1,7 @@
-# Connecting an assistant
+---
+title: Connecting an assistant
+description: How to add kumbuka as a custom MCP connector in claude.ai and what an assistant can do once it is live.
+---
 
 kumbuka is reached by an AI client as a **custom MCP connector**: an endpoint
 URL, a client id, and a client secret. Once connected, the assistant can call the
@@ -40,13 +43,13 @@ discovers the authorization server via OAuth Protected Resource Metadata
 (`/.well-known/oauth-protected-resource` → the `kumbuka` Keycloak realm), runs
 the authorization-code flow, and then calls `/mcp` with an audience-bound bearer
 token. The token's subject is *you*; your realm role (`member` or `admin`)
-determines what you may do. See [architecture.md](architecture.md) for the full
+determines what you may do. See [Architecture](/operations/architecture/) for the full
 auth topology.
 
 ## What the assistant can then do
 
 With the connector live, the assistant has the five `memory_*` tools (full
-reference in [mcp-tools.md](mcp-tools.md)):
+reference in [MCP tools](/reference/mcp-tools/)):
 
 - **Load context** at the start of a session with `memory_load_context` — a
   typed digest of the rules that should steer its work.
@@ -59,7 +62,7 @@ reference in [mcp-tools.md](mcp-tools.md)):
 
 Where a new memory lands when you don't name a scope is governed by the team's
 default write-scope policy (`ask` by default — the assistant proposes and you
-confirm). See [configuration.md](configuration.md).
+confirm). See [Configuration](/reference/configuration/).
 
 A good first move in a project is to tell the assistant to call
 `memory_load_context` at session start, so it applies the team's steering
