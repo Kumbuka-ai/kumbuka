@@ -17,7 +17,7 @@ Hostnames are **never hardcoded**. A deployment sets its own:
 | Host | Purpose | Example |
 |---|---|---|
 | Console | The admin UI | `kumbuka.ai` |
-| MCP endpoint | The `/mcp` surface AI clients connect to | `memory.kumbuka.ai` |
+| MCP endpoint | The `/mcp` surface AI clients connect to | `mcp.kumbuka.ai` |
 | Keycloak | The identity provider / sign-in host | `auth.kumbuka.ai` |
 
 The examples above are just examples. Set yours in `.env`; Caddy provisions TLS
@@ -61,9 +61,11 @@ deliberately.
 
 ### Connector details
 
-The **Settings → connector** card shows the endpoint URL, the client id, a masked
-client secret, and a **rotate** action. Rotating the secret **invalidates the old
-one immediately** — it is the connector-level kill-switch.
+The connector is configured by its **endpoint URL alone**, shown in the connect
+area on the overview page. There is no client id and no client secret: an AI
+client identifies itself to the authorization server and registers at first
+authorization. The connector-level kill-switch is **disabling the registered
+client** in the identity provider — not a secret rotation; there is no secret.
 
 ## Deployment knobs (set in `.env`)
 
@@ -71,12 +73,13 @@ Set in the environment before `docker compose up`. Typical categories (see the
 `kumbuka-server` README for exact names and defaults):
 
 - **Domain / hostnames** — the three hosts above.
-- **Secrets** — database credentials, Keycloak admin and client secrets, the
-  connector secret. Use strong values for anything internet-facing.
+- **Secrets** — database credentials, Keycloak admin and client secrets. Use
+  strong values for anything internet-facing.
 - **Database** — PostgreSQL connection settings (the app DB is `kumbuka`; schema
   is managed by Flyway).
 - **Identity** — Keycloak realm and client configuration (realm `kumbuka`;
-  clients `kumbuka-backend`, `kumbuka-admin`, `kumbuka-connector`).
+  clients `kumbuka-backend`, `kumbuka-admin`; AI clients register themselves at
+  first authorization).
 
 See [Quickstart](/en/get-started/quickstart/) to put these together for a first run, and
 [Security & privacy](/en/operations/security/) for the invariants a configuration must not break.

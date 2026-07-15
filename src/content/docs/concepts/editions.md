@@ -59,7 +59,6 @@ anzubieten (siehe [Sicherheit & Datenschutz](/operations/security/#network-sourc
 Ein kommerzieller **Dual-License**-Weg ist für Organisationen geplant, die nicht
 unter der AGPL operieren können oder die die Features der kommerziellen Edition
 wünschen. Details, Bedingungen und Verfügbarkeit sind noch nicht veröffentlicht.
-`[founder input]`
 
 Wie diese Lizenzierung mit Beiträgen zusammenwirkt, erfahren Sie in
 [CONTRIBUTING.md](https://github.com/kumbuka-ai/kumbuka/blob/main/CONTRIBUTING.md).

@@ -67,12 +67,14 @@ The backend plays **two** distinct OIDC roles against the Keycloak realm
    there to sign in). Every privileged call the console makes is brokered by the
    backend.
 
-### The claude.ai connector
+### The AI-client connector
 
-The connector client (`kumbuka-connector`) is **confidential + PKCE**. PKCE is
-sent regardless of client type; the client secret provides a real
-connector-level kill-switch (rotate it to revoke access) and matches claude.ai's
-pre-registered id-plus-secret path. See
+AI clients connect as **OAuth clients with PKCE**, onboarded by the endpoint
+URL alone: a client identifies itself to the authorization server through its
+published client metadata or dynamic client registration at first
+authorization — there is no client id to copy and no client secret. The
+connector-level kill-switch is **disabling the registered client** in the
+identity provider. See
 [Connecting an assistant](/en/get-started/connecting-an-assistant/).
 
 ## Data flow
@@ -84,9 +86,9 @@ pre-registered id-plus-secret path. See
   (session cookie) → admin REST API → PostgreSQL. **The console's read paths
   never return private entries** — there is no code path from an admin/team
   surface to anyone's private rows.
-- **Identity operations** (invite, enable/disable, roles, connector-secret
-  rotation) go through the backend's confidential service-account client to
-  Keycloak. The frontend has zero Keycloak knowledge.
+- **Identity operations** (invite, enable/disable, roles) go through the
+  backend's confidential service-account client to Keycloak. The frontend has
+  zero Keycloak knowledge.
 
 ## Access control, in one line
 

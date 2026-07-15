@@ -68,12 +68,15 @@ Das Backend spielt **zwei** verschiedene OIDC-Rollen gegenüber dem Keycloak-Rea
    Umleitung dorthin zur Anmeldung). Jeder privilegierte Aufruf der Konsole wird
    vom Backend vermittelt.
 
-### Der claude.ai-Connector
+### Der KI-Client-Connector
 
-Der Connector-Client (`kumbuka-connector`) ist **confidential + PKCE**. PKCE wird
-unabhängig vom Client-Typ gesendet; das Client-Secret bietet einen echten
-Connector-weiten Kill-Switch (durch Rotieren wird der Zugriff widerrufen) und
-entspricht dem von claude.ai vorregistrierten Pfad aus ID plus Secret. Siehe
+KI-Clients verbinden sich als **OAuth-Clients mit PKCE**, angebunden allein
+über die Endpunkt-URL: Ein Client weist sich gegenüber dem Autorisierungsserver
+über seine veröffentlichten Client-Metadaten oder die dynamische
+Client-Registrierung bei der ersten Autorisierung selbst aus — es gibt keine
+Client-ID zum Kopieren und kein Client-Secret. Der Notausschalter auf
+Connector-Ebene ist das **Deaktivieren des registrierten Clients** im
+Identity-Provider. Siehe
 [Einen Assistenten verbinden](/get-started/connecting-an-assistant/).
 
 ## Datenfluss
@@ -86,10 +89,9 @@ entspricht dem von claude.ai vorregistrierten Pfad aus ID plus Secret. Siehe
   (Session-Cookie) → Admin-REST-API → PostgreSQL. **Die Lesepfade der Konsole
   geben niemals private Einträge zurück** — es gibt keinen Codepfad von einer
   Admin-/Team-Oberfläche zu den privaten Zeilen einer Person.
-- **Identitätsoperationen** (Einladen, Aktivieren/Deaktivieren, Rollen, Rotation
-  des Connector-Secrets) laufen über den vertraulichen
-  Service-Account-Client des Backends zu Keycloak. Das Frontend hat null
-  Keycloak-Wissen.
+- **Identitätsoperationen** (Einladen, Aktivieren/Deaktivieren, Rollen) laufen
+  über den vertraulichen Service-Account-Client des Backends zu Keycloak. Das
+  Frontend hat null Keycloak-Wissen.
 
 ## Zugriffskontrolle, in einer Zeile
 

@@ -24,7 +24,7 @@ production deployment.
 
 The hostnames are configuration, never hardcoded (see
 [Configuration](/en/reference/configuration/)). The defaults referenced below —
-`kumbuka.ai`, `memory.kumbuka.ai`, `auth.kumbuka.ai` — are examples; set your
+`kumbuka.ai`, `mcp.kumbuka.ai`, `auth.kumbuka.ai` — are examples; set your
 own.
 
 ## 1. Get the stack
@@ -113,12 +113,14 @@ against a live or mock backend without Docker, see the
    (e.g. `billing-platform`).
 4. **Invite teammates** from **Team & users**; each gets an enrolment link from
    Keycloak (no password is set on their behalf).
-5. **Open the connector card** in **Settings** to get the endpoint URL, client
-   id, and client secret you will hand to an AI client.
+5. **Open the connect area** on the overview page to get the endpoint URL you
+   will hand to an AI client. The URL is all a client needs — there is no
+   client id and no client secret; the client registers itself at first
+   authorization.
 
 ## 6. Connect an assistant
 
-With the stack up and the connector details in hand, add kumbuka to your AI
+With the stack up and the endpoint URL in hand, add kumbuka to your AI
 client — see [Connecting an assistant](/en/get-started/connecting-an-assistant/).
 
 ## Next steps

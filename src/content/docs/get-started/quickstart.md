@@ -24,7 +24,7 @@ Produktivbereitstellung.
 
 Die Hostnamen sind Konfiguration, niemals fest verdrahtet (siehe
 [Konfiguration](/reference/configuration/)). Die unten genannten Standardwerte —
-`kumbuka.ai`, `memory.kumbuka.ai`, `auth.kumbuka.ai` — sind Beispiele; legen Sie
+`kumbuka.ai`, `mcp.kumbuka.ai`, `auth.kumbuka.ai` — sind Beispiele; legen Sie
 Ihre eigenen fest.
 
 ## 1. Den Stack beschaffen
@@ -116,12 +116,15 @@ die [`kumbuka-console`-README](https://github.com/kumbuka-ai/kumbuka-console#run
    Gedächtnis organisieren möchten (z. B. `billing-platform`).
 4. **Laden Sie Teammitglieder ein** über **Team & users**; jedes erhält einen
    Registrierungslink von Keycloak (es wird kein Passwort in ihrem Namen gesetzt).
-5. **Öffnen Sie die Connector-Karte** unter **Settings**, um die Endpunkt-URL, die
-   Client-ID und das Client-Secret zu erhalten, die Sie einem AI-Client übergeben.
+5. **Öffnen Sie den Verbindungsbereich** auf der Übersichtsseite, um die
+   Endpunkt-URL zu erhalten, die Sie einem AI-Client übergeben. Die URL ist
+   alles, was ein Client benötigt — es gibt keine Client-ID und kein
+   Client-Secret; der Client registriert sich bei der ersten Autorisierung
+   selbst.
 
 ## 6. Einen Assistenten verbinden
 
-Sobald der Stack läuft und Sie die Connector-Details zur Hand haben, fügen Sie
+Sobald der Stack läuft und Sie die Endpunkt-URL zur Hand haben, fügen Sie
 kumbuka zu Ihrem AI-Client hinzu — siehe
 [Einen Assistenten verbinden](/get-started/connecting-an-assistant/).
 
