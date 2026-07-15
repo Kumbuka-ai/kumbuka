@@ -17,7 +17,7 @@ Hostnamen sind **niemals fest codiert**. Jedes Deployment legt seine eigenen fes
 | Host | Zweck | Beispiel |
 |---|---|---|
 | Console | Die Admin-Oberfläche | `kumbuka.ai` |
-| MCP-Endpunkt | Die `/mcp`-Oberfläche, mit der sich KI-Clients verbinden | `memory.kumbuka.ai` |
+| MCP-Endpunkt | Die `/mcp`-Oberfläche, mit der sich KI-Clients verbinden | `mcp.kumbuka.ai` |
 | Keycloak | Der Identity-Provider / Anmelde-Host | `auth.kumbuka.ai` |
 
 Die obigen Beispiele sind nur Beispiele. Legen Sie Ihre eigenen in `.env` fest;
@@ -63,10 +63,13 @@ damit sie bewusst korrigiert werden kann.
 
 ### Connector-Details
 
-Die **Einstellungen → connector**-Karte zeigt die Endpunkt-URL, die Client-ID,
-ein maskiertes Client-Secret und eine **rotate**-Aktion. Das Rotieren des Secrets
-**macht das alte sofort ungültig** — es ist der Notausschalter auf
-Connector-Ebene.
+Der Connector wird allein über seine **Endpunkt-URL** konfiguriert, die im
+Verbindungsbereich auf der Übersichtsseite angezeigt wird. Es gibt keine
+Client-ID und kein Client-Secret: Ein KI-Client weist sich gegenüber dem
+Autorisierungsserver selbst aus und registriert sich bei der ersten
+Autorisierung. Der Notausschalter auf Connector-Ebene ist das **Deaktivieren
+des registrierten Clients** im Identity-Provider — keine Secret-Rotation; es
+gibt kein Secret.
 
 ## Deployment-Stellschrauben (in `.env` festgelegt)
 
@@ -74,13 +77,13 @@ In der Umgebung vor `docker compose up` festgelegt. Typische Kategorien (siehe d
 `kumbuka-server` README für genaue Namen und Standardwerte):
 
 - **Domain / Hostnamen** — die drei oben genannten Hosts.
-- **Secrets** — Datenbank-Anmeldedaten, Keycloak-Admin- und Client-Secrets, das
-  Connector-Secret. Verwenden Sie starke Werte für alles, was aus dem Internet
-  erreichbar ist.
+- **Secrets** — Datenbank-Anmeldedaten, Keycloak-Admin- und Client-Secrets.
+  Verwenden Sie starke Werte für alles, was aus dem Internet erreichbar ist.
 - **Datenbank** — PostgreSQL-Verbindungseinstellungen (die App-DB ist `kumbuka`;
   das Schema wird von Flyway verwaltet).
 - **Identität** — Keycloak-Realm- und Client-Konfiguration (Realm `kumbuka`;
-  Clients `kumbuka-backend`, `kumbuka-admin`, `kumbuka-connector`).
+  Clients `kumbuka-backend`, `kumbuka-admin`; KI-Clients registrieren sich
+  selbst bei der ersten Autorisierung).
 
 Siehe [Schnellstart](/get-started/quickstart/), um diese für einen ersten Lauf
 zusammenzustellen, und [Sicherheit & Datenschutz](/operations/security/) für die

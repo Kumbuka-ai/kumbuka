@@ -4,7 +4,7 @@ description: Wie Sie kumbuka als benutzerdefinierten MCP-Connector in claude.ai 
 ---
 
 kumbuka wird von einem KI-Client als **benutzerdefinierter MCP-Connector**
-erreicht: eine Endpunkt-URL, eine Client-ID und ein Client-Secret. Sobald die
+erreicht: Sie geben die Endpunkt-URL ein — sonst nichts. Sobald die
 Verbindung besteht, kann der Assistent die Gedächtnis-Tools in Ihrem Namen
 aufrufen — einschließlich Ihres eigenen privaten Scopes, denn die Verbindung ist
 auf *Sie*, den authentifizierten Benutzer, beschränkt.
@@ -15,14 +15,17 @@ Desktop, Claude Code und Claude Mobile siehe die
 
 ## Was Sie benötigen
 
-Aus der Karte **Settings → connector** der Admin-Konsole (oder von Ihrem
-Administrator):
+Aus dem **Verbindungsbereich auf der Übersichtsseite** der Admin-Konsole (oder
+von Ihrem Administrator):
 
-- **Endpunkt-URL** — die `/mcp`-Adresse, z. B. `https://memory.kumbuka.ai/mcp`
+- **Endpunkt-URL** — die `/mcp`-Adresse, z. B. `https://mcp.kumbuka.ai/mcp`
   (der Host Ihrer Bereitstellung; sie ist Konfiguration, kein fester Wert).
-- **Client-ID** — die OAuth-Client-ID des Connectors (`kumbuka-connector`).
-- **Client-Secret** — ein vertrauliches Secret. Es kann über die Konsole rotiert
-  werden, was das alte sofort ungültig macht.
+
+Das ist alles. Es gibt **keine Client-ID und kein Client-Secret** einzugeben:
+Der KI-Client weist sich gegenüber dem Autorisierungsserver selbst aus und
+registriert sich bei der ersten Autorisierung. Der Zugriff wird widerrufen,
+indem der registrierte Client im Identity-Provider **deaktiviert** wird — das
+ist der Notausschalter auf Connector-Ebene; es gibt kein Secret zu rotieren.
 
 > Remote-MCP-Connectoren in claude.ai erfordern einen kostenpflichtigen Plan. Ein
 > im Web hinzugefügter Server wird von Claude Mobile übernommen.
@@ -30,8 +33,7 @@ Administrator):
 ## In claude.ai hinzufügen
 
 1. Gehen Sie zu **Settings → Connectors → Add custom connector**.
-2. Geben Sie die **Endpunkt-URL** und die **Client-ID** / das **Client-Secret**
-   aus der Connector-Karte ein.
+2. Geben Sie die **Endpunkt-URL** aus dem Verbindungsbereich ein.
 3. Speichern Sie und klicken Sie dann auf **Connect**. claude.ai ermittelt den
    Autorisierungsserver aus dem Endpunkt und startet den OAuth-Flow.
 4. **Melden Sie sich** an Ihrem Keycloak-Host an (z. B. `https://auth.kumbuka.ai`)
@@ -40,13 +42,16 @@ Administrator):
 
 ### Was im Hintergrund passiert
 
-Der Connector ist ein vertraulicher Client, der zusätzlich **PKCE** sendet.
-claude.ai ermittelt den Autorisierungsserver über OAuth Protected Resource
-Metadata (`/.well-known/oauth-protected-resource` → der Keycloak-Realm `kumbuka`),
-durchläuft den Authorization-Code-Flow und ruft dann `/mcp` mit einem
-audience-gebundenen Bearer-Token auf. Das Subject des Tokens sind *Sie*; Ihre
-Realm-Rolle (`member` oder `admin`) bestimmt, was Sie tun dürfen. Siehe
-[Architektur](/operations/architecture/) für die vollständige Auth-Topologie.
+Der Connector ist ein OAuth-Client, der **PKCE** verwendet. claude.ai ermittelt
+den Autorisierungsserver über OAuth Protected Resource Metadata
+(`/.well-known/oauth-protected-resource` → der Keycloak-Realm `kumbuka`) und
+weist sich über seine veröffentlichten Client-Metadaten oder die dynamische
+Client-Registrierung selbst aus — deshalb wird keine Client-ID und kein Secret
+von Hand eingegeben. Anschließend durchläuft er den Authorization-Code-Flow und
+ruft `/mcp` mit einem audience-gebundenen Bearer-Token auf. Das Subject des
+Tokens sind *Sie*; Ihre Realm-Rolle (`member` oder `admin`) bestimmt, was Sie
+tun dürfen. Siehe [Architektur](/operations/architecture/) für die vollständige
+Auth-Topologie.
 
 ## Was der Assistent dann tun kann
 

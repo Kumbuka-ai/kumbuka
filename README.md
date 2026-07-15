@@ -97,11 +97,11 @@ for production deployment.
 
 ## Connect your assistant
 
-kumbuka is reached by AI clients as a **custom MCP connector** — an endpoint
-URL, a client id, and a client secret. In claude.ai you add it under
-**Settings → Connectors**, sign in once through the OAuth flow, and your
-assistant can then call the memory tools on your behalf, including your own
-private scope.
+kumbuka is reached by AI clients as a **custom MCP connector** — the endpoint
+URL is all a client needs; there is no client id and no client secret. In
+claude.ai you add it under **Settings → Connectors**, sign in once through the
+OAuth flow, and your assistant can then call the memory tools on your behalf,
+including your own private scope.
 
 See **[Connecting an assistant guide](https://docs.kumbuka.ai/get-started/connecting-an-assistant/)** for
 the walkthrough, and the

@@ -55,7 +55,7 @@ interact with over a network obliges you to offer them its corresponding source
 
 A commercial **dual-license** path is planned for organizations that cannot
 operate under the AGPL or that want the commercial-edition features. Details,
-terms, and availability are not yet published. `[founder input]`
+terms, and availability are not yet published.
 
 For how this licensing interacts with contributions, see
 [CONTRIBUTING.md](https://github.com/kumbuka-ai/kumbuka/blob/main/CONTRIBUTING.md).
