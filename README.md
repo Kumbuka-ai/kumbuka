@@ -4,8 +4,9 @@
 
 # kumbuka
 
-**Shared, persistent memory for AI assistants working with a team —
-served over MCP, curated through an admin console, with a private space that stays private.**
+**Services for teams that work with AI assistants and agents — curated rules,
+commissioned work, and the inventory of what is to be done, each held as
+individually addressable objects, each in a service of its own.**
 
 [![CI](https://img.shields.io/github/actions/workflow/status/kumbuka-ai/kumbuka/ci.yml?style=flat-square&label=CI&color=FF5B1F)](https://github.com/kumbuka-ai/kumbuka/actions/workflows/ci.yml)
 ![License](https://img.shields.io/badge/license-AGPL_v3-FF5B1F?style=flat-square)
@@ -27,39 +28,46 @@ served over MCP, curated through an admin console, with a private space that sta
 
 ---
 
-## The problem: the context tax
+## The problem: a result without a record
 
-AI assistants are stateless between sessions. A team using them pays the same
-toll over and over — re-explaining the things that should simply be known:
+AI assistants are stateless between sessions, and the work they do leaves a
+result but rarely a record. A team using them pays twice.
 
-- *"We use Postgres as the system of record."*
-- *"Money is integer minor units, never floats."*
-- *"Service names are kebab-case."*
+It pays the **context tax**: the same rules are explained again in every new
+session — *"we use Postgres as the system of record"*, *"money is integer minor
+units, never floats"* — because the decisions, conventions and constraints that
+should shape the work live in people's heads and in scattered chat history.
 
-That steering knowledge — the decisions, conventions, and constraints that
-shape how an assistant should work — is exactly what an assistant ought to
-*remember* and apply without being told again. Today it lives in people's heads
-and in scattered chat history, so every new session starts from zero.
+And it loses the **trail of the work itself**. Once an assistant or an agent
+has done something, the questions that matter later are hard to answer: who
+asked for it, under which rule, what came back, and who accepted it. A session
+transcript ends with the session; a finished file does not say which request
+produced it.
 
 ## What kumbuka is
 
-kumbuka makes that knowledge a first-class, team-owned asset. It gives a team a
-durable, shared place for the rules an assistant should carry across
-conversations, and serves them to any MCP-capable assistant (Claude and others)
-over a remote **MCP server**. A web **admin console** lets the team curate the
-shared memory.
+kumbuka is a set of services that hold exactly those things — what a team has
+settled, the work it commissions and gets back, and what it still intends to
+do — as objects that are addressed one by one, read by assistants over the
+**Model Context Protocol (MCP)**, and curated by the team.
 
-It is deliberately **not** a document store or a RAG index. kumbuka holds
-*work-steering knowledge* — a small, typed set of decisions, conventions,
-constraints, definitions, open questions, and status — not a copy of your docs
-or source, which stay in their own systems.
+| Service | What it holds |
+|---|---|
+| **Memory** | The curated rules a team has settled — decisions, conventions, constraints, definitions, open questions and status — typed, scoped, and read by the assistant at the start of the work. |
+| **Dispatch** | Work commissioned and returned: one party states a task, another takes it up and answers, and the acceptance of the answer is an act of its own; the commission freezes when it is sent, so it stays readable later who asked what, who answered, and what was accepted. |
+| **Worklist** | The inventory of what is to be done and in what order: items that are created, characterised, planned, claimed, worked and terminated, and that stay editable for their whole life. |
+| **Documents** | The documents that say what currently holds. `kumbuka-documents` is not yet publicly available. |
 
-- **Shared and curatable** — the team sees and edits what the assistant relies
-  on, instead of each person accumulating an opaque, divergent context.
-- **Portable** — any MCP-capable assistant reads and writes it through one
-  endpoint.
-- **Bounded** — a fixed taxonomy and explicit scopes keep the memory legible
-  rather than letting it sprawl.
+Each service is built as a **product of its own** and published in its own
+repository. Every service has a complete REST interface. **Dispatch** and
+**Worklist** each also carry their own MCP endpoint; **Memory** has no MCP adapter of its own and is reached by
+assistants through the platform's MCP entry point (see
+[Architecture](#architecture)).
+
+kumbuka is deliberately **not** a document store or a RAG index, and it does
+not watch what people do. It holds *curated* content that someone wrote down
+and the team stands behind, not a copy of your docs or source, which stay in
+their own systems.
 
 ## The private-memory guarantee
 
@@ -75,129 +83,158 @@ memory untouched and theirs.
 
 See [the Security & privacy guide](https://docs.kumbuka.ai/operations/security/) for how this is structurally enforced.
 
-## Quickstart (self-host the Community Edition)
+## Tenant separation
 
-The Community Edition is the free, self-hosted, single-tenant memory core. It
-runs as a single Docker Compose stack (backend · PostgreSQL · Keycloak · Caddy).
-The deployable stack lives in the
-[`kumbuka-server`](https://github.com/kumbuka-ai/kumbuka-server) repository:
+Each service keeps its own schema and its own database role in PostgreSQL.
+Tenants are separated by **row-level security** on the tenant axis: the policy
+fails closed, so a request that is not bound to a tenant sees no rows rather
+than all of them. The runtime role of a service owns nothing and holds only the
+privileges its migrations enumerate, so it cannot switch the policy off.
 
-```bash
-git clone https://github.com/kumbuka-ai/kumbuka-server
-cd kumbuka-server
-cp .env.example .env                  # set your domain + secrets
-docker compose --profile app up -d    # backend + postgres + keycloak + caddy
-```
+## One sign-in for every service
 
-The admin console is a separate service, added to the same stack via a small
-`compose.override.yml` — see the step-by-step
-**[Quickstart guide](https://docs.kumbuka.ai/get-started/quickstart/)**, which also covers prerequisites,
-first run, and the [`kumbuka-server` runbook](https://github.com/kumbuka-ai/kumbuka-server#quick-start-dev)
-for production deployment.
+Sign-in runs through **[`cimd-proxy`](https://github.com/kumbuka-ai/cimd-proxy)**,
+the OAuth 2.1 authorization server in front of the identity provider. Outward
+it speaks **Client ID Metadata Documents**: an MCP client identifies itself by
+a URL it controls, so the endpoint URL is all a client needs — no client id and
+no client secret to copy around. Inward it federates the sign-in to
+**Keycloak**, which issues the token.
+
+From outside, the platform is **one resource with one audience**. One sign-in
+yields one token, and that token is valid for every service behind the entry
+point. Each service validates the unchanged token itself; none relies on a
+predecessor having checked it.
 
 ## Connect your assistant
 
-kumbuka is reached by AI clients as a **custom MCP connector** — the endpoint
-URL is all a client needs; there is no client id and no client secret. In
-claude.ai you add it under **Settings → Connectors**, sign in once through the
-OAuth flow, and your assistant can then call the memory tools on your behalf,
-including your own private scope.
+kumbuka is reached by AI clients as a **custom MCP connector**. In claude.ai you
+add it under **Settings → Connectors**, sign in once through the OAuth flow, and
+your assistant can then call the services' tools on your behalf, including your
+own private memory scope.
 
-See **[Connecting an assistant guide](https://docs.kumbuka.ai/get-started/connecting-an-assistant/)** for
-the walkthrough, and the
-[`kumbuka-server` guide](https://github.com/kumbuka-ai/kumbuka-server#connecting-claude-clients)
-for Claude Desktop, Claude Code, and Claude Mobile.
-
-## MCP tools at a glance
-
-Served over **Streamable HTTP** at `/mcp`, scoped to the authenticated user. The
-tool names are kept functional on purpose — the model reads them, and clarity
-beats brand noise.
-
-| Tool | What it does |
-|---|---|
-| `memory_remember` | Write or append an entry (upsert on `key`). Caller picks `scope`, `type`, optional `key`. |
-| `memory_recall` | Read entries with filters: `scope`, `type`, substring `query`, optional `include_global`. |
-| `memory_forget` | Remove an entry by `id` or by `(scope, key)`. |
-| `memory_scopes` | List the scopes the caller may see (their private scope plus shared ones). |
-| `memory_load_context` | A typed, ready-to-inject digest of the relevant rules, grouped by type. |
-
-Full reference: **[MCP tools reference](https://docs.kumbuka.ai/reference/mcp-tools/)**.
+Through the platform's entry point the tools are named `<service>_<verb>` —
+`memory_query`, `dispatch_claim`, `worklist_create` and so on — so one
+connector carries the tools of every service.
 
 ## Architecture
 
-A single Docker Compose stack. The **Quarkus / Java 21 backend** is the only
-component that talks to the identity provider; it serves both the `/mcp` surface
-and the admin REST API. **Keycloak** (headless, OAuth 2.1) is the IdP; the
-console is a **BFF** client and never holds tokens. **PostgreSQL** is the system
-of record (Flyway migrations). **Caddy** is the edge.
+The diagram shows the hosted deployment as it runs today. **Caddy** is the
+edge and validates no token. **cimd-proxy** is the authorization server, and
+**Keycloak** is the identity provider behind it. The **platform** is the entry
+point: a router that reads the service named in an address and forwards the
+call over REST to the service that owns it, together with the management core
+for scopes, teams and settings. **Memory**, **Dispatch** and **Worklist** each
+validate the token themselves and keep their own schema in one **PostgreSQL**
+instance. The **ops console** is the operator's own interface, reachable only
+from an IP allow-list.
 
 ```mermaid
 flowchart TD
-    subgraph clients[AI clients]
-      A["claude.ai · Desktop · Code · Mobile"]
+    C["AI assistant or agent<br/>(any MCP client)"]
+    O["Operator browser"]
+
+    E["Caddy edge<br/>(validates no token)"]
+
+    X["cimd-proxy<br/>OAuth 2.1 authorization server<br/>(Client ID Metadata Documents)"]
+    K["Keycloak<br/>(identity provider, issues the token)"]
+
+    R["platform<br/>router + management core"]
+
+    subgraph services["Domain services (each validates the token itself)"]
+      M["Memory"]
+      D["Dispatch"]
+      W["Worklist"]
     end
-    B[Browser · admin console]
 
-    A -- "OAuth 2.1 + bearer token" --> E
-    B --> E
+    OC["ops console<br/>(operator, IP allow-list)"]
+    P[("PostgreSQL<br/>one schema and one role per service")]
 
-    E[Caddy edge]
-    E -- "/mcp (Streamable HTTP)" --> S
-    E -- "/api/* (admin REST)" --> S
-    E -- "/ (console UI)" --> N
-    E -- "/auth/* (redirect)" --> K
+    C -- "1 · sign-in" --> E
+    E -- "auth host" --> X
+    X -- "federates sign-in" --> K
+    C -- "2 · MCP or REST + bearer token" --> E
+    E -- "/mcp, /api" --> R
+    R -- "REST, token forwarded unchanged" --> M
+    R -- "REST, token forwarded unchanged" --> D
+    R -- "REST, token forwarded unchanged" --> W
 
-    S["Quarkus backend<br/>resource server + BFF"]
-    N["Next.js admin console<br/>(BFF client, no tokens)"]
-    K["Keycloak<br/>(headless, OAuth 2.1)"]
-    P["PostgreSQL<br/>(system of record)"]
+    O --> E
+    E -- "ops host" --> OC
 
-    N -- "session cookie" --> S
-    S -- "OIDC: bearer + confidential" --> K
-    S -- "JDBC + Flyway" --> P
+    R --> P
+    M --> P
+    D --> P
+    W --> P
+    K --> P
+    OC --> P
 ```
 
-The backend plays **two OIDC roles**: a bearer **resource server** for `/mcp`,
-and a confidential **web-app client** (BFF) for the console. Details and the
-data flow are in **[Architecture guide](https://docs.kumbuka.ai/operations/architecture/)**.
+The router and the unified interface exist only in the enterprise edition.
+In a community installation there is no router, and the services are addressed
+directly.
+
+## Quickstart
+
+There is **no self-host package for the services today**, and this README does
+not pretend otherwise. Each service repository documents how to build the
+service, run its full test suite, and configure it for your own database and
+identity provider. The suites need
+Docker; they start their own PostgreSQL (and, for Dispatch and Worklist, their
+own Keycloak) through Testcontainers.
+
+- [`kumbuka-memory`](https://github.com/kumbuka-ai/kumbuka-memory) — configuration and build
+- [`kumbuka-dispatch`](https://github.com/kumbuka-ai/kumbuka-dispatch) — configuration, build and test
+- [`kumbuka-worklist`](https://github.com/kumbuka-ai/kumbuka-worklist) — configuration, build and test
+- [`cimd-proxy`](https://github.com/kumbuka-ai/cimd-proxy) — quick start and configuration of the authorization server
+
+The Docker Compose stack in
+[`kumbuka-server`](https://github.com/kumbuka-ai/kumbuka-server) starts the
+management core with PostgreSQL, Keycloak and Caddy. The memory engine has
+left that repository, so the stack no longer serves memory on its own.
 
 ## Repo map
 
 | Repo | What it is |
 |---|---|
 | [`kumbuka`](https://github.com/kumbuka-ai/kumbuka) | This repo — the project front door and public documentation. |
-| [`kumbuka-server`](https://github.com/kumbuka-ai/kumbuka-server) | The Quarkus backend, the MCP surface, Keycloak realm/theme, and the Docker Compose stack you deploy. |
-| [`kumbuka-console`](https://github.com/kumbuka-ai/kumbuka-console) | The Next.js admin console (the team-facing UI). |
+| [`kumbuka-memory`](https://github.com/kumbuka-ai/kumbuka-memory) | The memory service: curated entries, their scoping and authorship, and the typed relations between them. AGPL-3.0. |
+| [`kumbuka-dispatch`](https://github.com/kumbuka-ai/kumbuka-dispatch) | The dispatch service: commissioned work and its answer as durable, addressable objects. AGPL-3.0. |
+| [`kumbuka-worklist`](https://github.com/kumbuka-ai/kumbuka-worklist) | The worklist service: what a scope intends to do, as items worked through a process. AGPL-3.0. |
+| `kumbuka-documents` | The documents service. Not yet publicly available. |
+| [`cimd-proxy`](https://github.com/kumbuka-ai/cimd-proxy) | The OAuth 2.1 authorization server: Client ID Metadata Documents outward, federation to an existing OIDC provider such as Keycloak inward. Apache-2.0. |
+| [`kumbuka-server`](https://github.com/kumbuka-ai/kumbuka-server) | The management core: scopes, teams, settings and the tenancy directory. AGPL-3.0. |
+| [`kumbuka-console`](https://github.com/kumbuka-ai/kumbuka-console) | The Next.js admin console. AGPL-3.0. |
+
+The router and the enterprise modules live in private repositories.
 
 ## Documentation
 
-The full documentation site lives at **[docs.kumbuka.ai](https://docs.kumbuka.ai)** (English and German).
+The documentation site lives at **[docs.kumbuka.ai](https://docs.kumbuka.ai)**
+(English and German). It still describes the earlier memory-only stack in
+places; where it and this README disagree on which services exist, this README
+is current.
 
-| Guide | For |
-|---|---|
-| [Overview](https://docs.kumbuka.ai/get-started/overview/) | What kumbuka is and the personal/shared boundary. |
-| [Concepts](https://docs.kumbuka.ai/concepts/data-model/) | The domain model: scopes, the entry taxonomy, authorship, keys. |
-| [Quickstart](https://docs.kumbuka.ai/get-started/quickstart/) | Self-hosting the Community Edition, step by step. |
-| [Connecting an assistant](https://docs.kumbuka.ai/get-started/connecting-an-assistant/) | Adding the connector in claude.ai. |
-| [MCP tools](https://docs.kumbuka.ai/reference/mcp-tools/) | Reference for the five `memory_*` tools. |
-| [Architecture](https://docs.kumbuka.ai/operations/architecture/) | Topology, the two OIDC roles, components, data flow. |
-| [Security & privacy](https://docs.kumbuka.ai/operations/security/) | The private guarantee, structurally enforced; disable vs. erasure. |
-| [Configuration](https://docs.kumbuka.ai/reference/configuration/) | Env/config knobs and policies. |
-| [Editions](https://docs.kumbuka.ai/concepts/editions/) | Community Edition vs. the commercial path. |
+## Editions and license
 
-## License
+kumbuka is **open core**, and the line between the editions is a repository
+line: the repository boundary is the licence boundary.
 
-kumbuka is licensed under the **GNU Affero General Public License v3.0**
-([AGPL-3.0](LICENSE)). Because kumbuka is typically deployed as a
-network-accessible service, AGPL **§13** applies: if you run a modified version
-and let users interact with it over a network, you must offer those users the
-corresponding source of your modified version.
+- **Community edition.** The public service repositories (`kumbuka-memory`,
+  `kumbuka-dispatch`, `kumbuka-worklist`, together with `kumbuka-server` and
+  `kumbuka-console`) are open source under the **GNU Affero General Public License v3.0**
+  ([AGPL-3.0](LICENSE)), and each service is built as a complete product on
+  its own.
+  `cimd-proxy` is a standalone tool and is published under **Apache-2.0**.
+- **Enterprise edition.** Each service has a separate, closed enterprise module
+  that is composed with its open core at build time. The enterprise edition
+  **adds and never alters**: versioning and audit are the first things it adds.
+  The router — the single entry point in front of all services — and the
+  unified interface on top of it belong to the enterprise edition.
 
-A commercial **dual-license** path is planned for organizations that cannot
-operate under the AGPL or that want the commercial-edition features (see
-[Editions](https://docs.kumbuka.ai/concepts/editions/)). It is not yet generally available — no
-prices or dates yet.
+Because kumbuka is typically deployed as a network-accessible service, AGPL
+**§13** applies: if you run a modified version and let users interact with it
+over a network, you must offer those users the corresponding source of your
+modified version.
 
 ## Contributing
 
