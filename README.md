@@ -222,7 +222,7 @@ line: the repository boundary is the licence boundary.
 - **Community edition.** The public service repositories (`kumbuka-memory`,
   `kumbuka-dispatch`, `kumbuka-worklist`, together with `kumbuka-server` and
   `kumbuka-console`) are open source under the **GNU Affero General Public License v3.0**
-  ([AGPL-3.0](LICENSE)), and each service is built as a complete product on
+  ([AGPL-3.0](https://www.gnu.org/licenses/agpl-3.0.html)), and each service is built as a complete product on
   its own.
   `cimd-proxy` is a standalone tool and is published under **Apache-2.0**.
 - **Enterprise edition.** Each service has a separate, closed enterprise module
