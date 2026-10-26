@@ -1,3 +1,8 @@
+# Copyright (c) 2026 JBAConsult - Architekturberatung Johannes Bayer-Albert
+# All rights reserved. Copying, reproduction, distribution or any other
+# use of this file, in whole or in part, without the prior written
+# permission of the copyright holder is prohibited.
+
 name: CI
 
 on:
@@ -22,7 +27,8 @@ jobs:
   # turn the build red; results land in the job summary.
   links:
     name: Check Markdown links
-    runs-on: ubuntu-latest
+    # Own branches run on apollo, fork pull requests on a hosted runner.
+    runs-on: ${{ (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && 'apollo' || 'ubuntu-latest' }}
     steps:
       - uses: actions/checkout@v4
       - name: Check external links (report only)
@@ -43,7 +49,8 @@ jobs:
   # internal link or missing heading anchor, and Astro fails on bad content.
   build:
     name: Build docs site
-    runs-on: ubuntu-latest
+    # Own branches run on apollo, fork pull requests on a hosted runner.
+    runs-on: ${{ (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && 'apollo' || 'ubuntu-latest' }}
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -61,7 +68,8 @@ jobs:
   # Lax style lint on the hand-authored root prose files only.
   markdownlint:
     name: Lint Markdown style
-    runs-on: ubuntu-latest
+    # Own branches run on apollo, fork pull requests on a hosted runner.
+    runs-on: ${{ (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && 'apollo' || 'ubuntu-latest' }}
     steps:
       - uses: actions/checkout@v4
       - name: markdownlint-cli2
