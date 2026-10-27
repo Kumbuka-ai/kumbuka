@@ -59,7 +59,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: pnpm
+          # No GitHub cache on apollo: up- and downloading it over the runner's uplink costs
+          # minutes, more than fetching the dependencies fresh (organisation rule, see
+          # Kumbuka-ai/workflows reusable-security-image.yml).
       - name: Install
         run: pnpm install --frozen-lockfile
       - name: Build (validates internal links + content)
